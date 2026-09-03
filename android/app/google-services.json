@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "424970657652",
+    "project_id": "barnashtawy-app",
+    "storage_bucket": "barnashtawy-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:424970657652:android:7aa294873c2e3b3b6bd621",
+        "android_client_info": {
+          "package_name": "com.example.barnasht_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC57rYug1Jf3zuwbieg6pb9OGN-hn3Bkv8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
