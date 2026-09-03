@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -25,50 +26,90 @@
 
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 520px;
             text-align: center;
-            background: white;
-            padding: 50px 30px;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            background: #ffffff;
+            padding: 45px 30px;
+            border-radius: 28px;
+            box-shadow: 0 12px 45px rgba(0, 0, 0, 0.08);
         }
 
         .logo {
-            font-size: 64px;
-            margin-bottom: 10px;
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 18px;
         }
 
         h1 {
             margin: 0 0 12px;
-            font-size: 36px;
+            font-size: 38px;
+            font-weight: 700;
         }
 
-        p {
+        .subtitle {
+            margin: 0 auto;
+            max-width: 420px;
             color: #666;
             font-size: 18px;
-            line-height: 1.8;
+            line-height: 1.9;
         }
 
         .download {
             display: inline-block;
-            margin-top: 25px;
-            padding: 16px 35px;
+            margin-top: 28px;
+            padding: 16px 38px;
             background: #6B8E6E;
             color: white;
             text-decoration: none;
             border-radius: 14px;
             font-size: 18px;
             font-weight: bold;
+            transition: 0.2s ease;
         }
 
         .download:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            opacity: 0.92;
         }
 
         .version {
             margin-top: 20px;
             font-size: 14px;
-            color: #888;
+            color: #999;
+        }
+
+        .features {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #eeeeee;
+            color: #666;
+            font-size: 15px;
+            line-height: 2;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 38px 22px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .download {
+                width: 100%;
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -77,13 +118,18 @@
 
 <div class="container">
 
-    <div class="logo">🌙</div>
+    <img
+        src="assets/images/app_logo_transparent.png"
+        alt="شعار برنشتاوي"
+        class="logo"
+    >
 
     <h1>برنشتاوي</h1>
 
-    <p>
-        كل خدمات ومعلومات قرية برنشت
-        في مكان واحد.
+    <p class="subtitle">
+        كل ما يخص برنشت في مكان واحد.
+        اكتشف الأماكن والخدمات من حولك، وأضف مشروعك أو محلك
+        ليصل إليك أهل البلد بسهولة.
     </p>
 
     <a
@@ -97,7 +143,14 @@
         Android · الإصدار 1.0.0
     </div>
 
+    <div class="features">
+        📍 اكتشف الأماكن والخدمات في برنشت<br>
+        🏪 أضف مشروعك أو محلك بسهولة<br>
+        🤝 ساعد أهل برنشت في الوصول إليك
+    </div>
+
 </div>
 
 </body>
 </html>
+```
