@@ -1,4 +1,3 @@
-
 abstract class DatabaseService {
   Future<String> addData({
     required String path,
@@ -17,4 +16,3 @@ abstract class DatabaseService {
     required String documentId,
   });
 }
-

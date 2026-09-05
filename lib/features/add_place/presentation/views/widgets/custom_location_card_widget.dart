@@ -1,3 +1,4 @@
+import 'package:barnasht_app/core/utils/app_images.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:flutter/foundation.dart';
@@ -7,9 +8,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CustomLocationCardWidget extends StatefulWidget {
-  const CustomLocationCardWidget({super.key, required this.onLocationChanged});
+  const CustomLocationCardWidget({
+    super.key,
+    required this.onLocationChanged,
+    this.hasLocation = false,
+  });
 
   final ValueChanged<LatLng?> onLocationChanged;
+  final bool hasLocation;
 
   @override
   State<CustomLocationCardWidget> createState() =>
@@ -99,9 +105,180 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
   LatLng? _selectedLocation;
 
+  LatLng? _previousLocation;
+
+  // ============================================================
+  // DRAG LOCATION
+  // ============================================================
+
+  LatLng? _draggedLocation;
+
+  bool _isDraggingMarker = false;
+
+  Offset? _markerOffset;
+
+  // ============================================================
+  // STATE
+  // ============================================================
+
   bool _isGettingLocation = false;
 
   bool _mapInitialized = false;
+
+  // ============================================================
+  // BARNSHTAWY MARKER
+  // ============================================================
+
+  static const String _markerAsset = Assets.imagesAppLogoTransparent;
+
+  // حجم الـ Marker على الشاشة
+  static const double _markerSize = 70;
+
+  final GlobalKey _mapKey = GlobalKey();
+
+  // ============================================================
+  // UPDATE MARKER SCREEN POSITION
+  // ============================================================
+
+  Future<void> _updateMarkerScreenPosition() async {
+    if (_mapController == null || _selectedLocation == null) {
+      return;
+    }
+
+    try {
+      final ScreenCoordinate screenCoordinate = await _mapController!
+          .getScreenCoordinate(_selectedLocation!);
+
+      if (!mounted) return;
+
+      final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+
+      // ScreenCoordinate بالفعل relative للـ GoogleMap
+      final double x = screenCoordinate.x / devicePixelRatio;
+      final double y = screenCoordinate.y / devicePixelRatio;
+
+      setState(() {
+        _markerOffset = Offset(x - (_markerSize / 2), y - _markerSize);
+      });
+    } catch (e) {
+      debugPrint('Failed to update marker screen position: $e');
+    }
+  }
+
+  // ============================================================
+  // MARKER DRAG START
+  // ============================================================
+
+  void _onMarkerPanStart(DragStartDetails details) {
+    if (_selectedLocation == null) return;
+
+    _previousLocation = _selectedLocation;
+    _draggedLocation = _selectedLocation;
+
+    setState(() {
+      _isDraggingMarker = true;
+    });
+  }
+
+  // ============================================================
+  // MARKER DRAG UPDATE
+  // ============================================================
+
+  Future<void> _onMarkerPanUpdate(DragUpdateDetails details) async {
+    if (_mapController == null) return;
+
+    final RenderBox? mapBox =
+        _mapKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (mapBox == null) return;
+
+    final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+
+    final Offset mapGlobalPosition = mapBox.localToGlobal(Offset.zero);
+
+    // مكان إصبع المستخدم داخل الخريطة
+    final Offset localPosition = details.globalPosition - mapGlobalPosition;
+
+    final ScreenCoordinate screenCoordinate = ScreenCoordinate(
+      x: (localPosition.dx * devicePixelRatio).round(),
+      y: (localPosition.dy * devicePixelRatio).round(),
+    );
+
+    try {
+      final LatLng newLocation = await _mapController!.getLatLng(
+        screenCoordinate,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _draggedLocation = newLocation;
+
+        _markerOffset = Offset(
+          localPosition.dx - (_markerSize / 2),
+          localPosition.dy - _markerSize,
+        );
+      });
+    } catch (_) {
+      // Ignore conversion errors.
+    }
+  }
+
+  // ============================================================
+  // MARKER DRAG END
+  // ============================================================
+
+  void _onMarkerPanEnd(DragEndDetails details) {
+    setState(() {
+      _isDraggingMarker = false;
+    });
+
+    final LatLng? newLocation = _draggedLocation;
+
+    if (newLocation == null) {
+      return;
+    }
+
+    // ==========================================================
+    // LOCATION OUTSIDE BARNSHT
+    // ==========================================================
+
+    if (!_isInsideBarnasht(newLocation)) {
+      buildBar(
+        context,
+        'الموقع خارج نطاق قرية برنشت، اختر موقعًا داخل القرية',
+        type: SnackBarType.info,
+      );
+
+      if (_previousLocation != null) {
+        _updateSelectedLocation(_previousLocation!);
+      }
+
+      return;
+    }
+
+    // ==========================================================
+    // VALID LOCATION
+    // ==========================================================
+
+    _updateSelectedLocation(newLocation);
+  }
+
+  // ============================================================
+  // UPDATE SELECTED LOCATION
+  // ============================================================
+
+  void _updateSelectedLocation(LatLng location) {
+    setState(() {
+      _selectedLocation = location;
+    });
+
+    widget.onLocationChanged(location);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateMarkerScreenPosition();
+    });
+  }
 
   // ============================================================
   // USE MY LOCATION
@@ -115,15 +292,17 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
     });
 
     try {
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
       if (!serviceEnabled) {
         if (!mounted) return;
+
         buildBar(
           context,
-          'من فضلك قم بتفعيل خدمة الموقع أولاً',
+          'من فضلك قم بتفعيل خدمة الموقع',
           type: SnackBarType.info,
         );
+
         return;
       }
 
@@ -136,11 +315,8 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       if (permission == LocationPermission.denied) {
         if (!mounted) return;
 
-        buildBar(
-          context,
-          'تم رفض صلاحية الوصول إلى الموقع',
-          type: SnackBarType.info,
-        );
+        buildBar(context, 'تم رفض صلاحية الموقع', type: SnackBarType.info);
+
         return;
       }
 
@@ -149,49 +325,58 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
         buildBar(
           context,
-          'صلاحية الموقع مرفوضة نهائيًا، يمكنك تفعيلها من إعدادات التطبيق',
+          'صلاحية الموقع مرفوضة نهائيًا، قم بتفعيلها من إعدادات التطبيق',
           type: SnackBarType.info,
         );
 
         return;
       }
 
-      final position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
         ),
       );
 
-      final newLocation = LatLng(position.latitude, position.longitude);
+      final LatLng location = LatLng(position.latitude, position.longitude);
 
-      debugPrint(
-        'Current Location: '
-        '${newLocation.latitude}, '
-        '${newLocation.longitude}',
-      );
+      // ========================================================
+      // CHECK BARNSHT
+      // ========================================================
 
-      if (!_isInsideBarnasht(newLocation)) {
+      if (!_isInsideBarnasht(location)) {
         if (!mounted) return;
 
         buildBar(
           context,
-          'موقعك الحالي خارج نطاق قرية برنشت، لا يمكن استخدام هذا الموقع',
+          'موقعك الحالي خارج نطاق قرية برنشت',
           type: SnackBarType.info,
         );
 
         return;
       }
 
-      _updateSelectedLocation(newLocation);
+      _updateSelectedLocation(location);
 
-      await _mapController?.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: newLocation, zoom: 18),
-        ),
-      );
+      // ========================================================
+      // MOVE CAMERA
+      // ========================================================
+
+      if (_mapController != null) {
+        await _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: location, zoom: 18),
+          ),
+        );
+      }
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      await _updateMarkerScreenPosition();
     } catch (e) {
       if (!mounted) return;
-      buildBar(context, 'حدث خطأ أثناء تحديد موقعك', type: SnackBarType.error);
+
+      buildBar(context, 'حدث خطأ أثناء تحديد موقعك', type: SnackBarType.info);
     } finally {
       if (mounted) {
         setState(() {
@@ -202,30 +387,73 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
   }
 
   // ============================================================
-  // UPDATE SELECTED LOCATION
+  // INITIAL USER LOCATION
   // ============================================================
 
-  void _updateSelectedLocation(LatLng location) {
-    if (!mounted) return;
+  Future<void> _initializeUserLocation() async {
+    try {
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
-    setState(() {
-      _selectedLocation = location;
-    });
+      if (!serviceEnabled) {
+        return;
+      }
 
-    widget.onLocationChanged(location);
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
+      final LatLng location = LatLng(position.latitude, position.longitude);
+
+      // ========================================================
+      // CHECK BARNSHT
+      // ========================================================
+
+      if (!_isInsideBarnasht(location)) {
+        if (!mounted) return;
+
+        buildBar(
+          context,
+          'موقعك الحالي خارج نطاق قرية برنشت',
+          type: SnackBarType.info,
+        );
+
+        return;
+      }
+
+      _updateSelectedLocation(location);
+
+      // ========================================================
+      // MOVE CAMERA
+      // ========================================================
+
+      if (_mapController != null) {
+        await _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: location, zoom: 18),
+          ),
+        );
+      }
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      await _updateMarkerScreenPosition();
+    } catch (_) {
+      // Ignore location initialization errors.
+    }
   }
-
-  // ============================================================
-  // MAP CAMERA MOVE
-  // ============================================================
-
-  void _onCameraMove(CameraPosition position) {}
-
-  // ============================================================
-  // MAP CAMERA IDLE
-  // ============================================================
-
-  void _onCameraIdle() {}
 
   // ============================================================
   // CHECK LOCATION INSIDE BARNSHT
@@ -239,13 +467,15 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       i < _barnashtBoundary.length;
       j = i++
     ) {
-      final xi = _barnashtBoundary[i].latitude;
-      final yi = _barnashtBoundary[i].longitude;
+      final double xi = _barnashtBoundary[i].latitude;
 
-      final xj = _barnashtBoundary[j].latitude;
-      final yj = _barnashtBoundary[j].longitude;
+      final double yi = _barnashtBoundary[i].longitude;
 
-      final intersect =
+      final double xj = _barnashtBoundary[j].latitude;
+
+      final double yj = _barnashtBoundary[j].longitude;
+
+      final bool intersect =
           ((yi > point.longitude) != (yj > point.longitude)) &&
           (point.latitude <
               (xj - xi) * (point.longitude - yi) / (yj - yi) + xi);
@@ -259,8 +489,32 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
   }
 
   // ============================================================
-  // MESSAGE
+  // MAP TAP
   // ============================================================
+
+  void _onMapTap(LatLng location) {
+    // ==========================================================
+    // CHECK BARNSHT
+    // ==========================================================
+
+    if (!_isInsideBarnasht(location)) {
+      buildBar(
+        context,
+        'الموقع خارج نطاق قرية برنشت، اختر موقعًا داخل القرية',
+        type: SnackBarType.info,
+      );
+
+      return;
+    }
+
+    // ==========================================================
+    // UPDATE LOCATION
+    // ==========================================================
+
+    _previousLocation = _selectedLocation;
+
+    _updateSelectedLocation(location);
+  }
 
   // ============================================================
   // BUILD
@@ -274,22 +528,19 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
     // Semantic colors
     final successColor = colorScheme.primary;
+
     final errorColor = colorScheme.error;
 
     return Container(
       decoration: BoxDecoration(
-        // Card / Surface
         color: colorScheme.surface,
-
         borderRadius: BorderRadius.circular(20),
-
         border: Border.all(
           color: hasLocation
               ? successColor.withValues(alpha: 0.25)
               : errorColor.withValues(alpha: 0.25),
           width: 1.1,
         ),
-
         boxShadow: [
           BoxShadow(
             color: successColor.withValues(alpha: 0.07),
@@ -298,10 +549,8 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
           ),
         ],
       ),
-
       child: Padding(
         padding: const EdgeInsets.all(10),
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -311,10 +560,12 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
-
               child: Row(
                 children: [
-                  // Location Icon Container
+                  // ==================================================
+                  // LOCATION ICON
+                  // ==================================================
+
                   Container(
                     width: 38,
                     height: 38,
@@ -331,7 +582,9 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
                   const SizedBox(width: 9),
 
-                  // Title
+                  // ==================================================
+                  // TITLE
+                  // ==================================================
                   Expanded(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -362,23 +615,18 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                   // ==================================================
                   Material(
                     color: Colors.transparent,
-
                     child: InkWell(
                       onTap: _isGettingLocation ? null : _useMyLocation,
-
                       borderRadius: BorderRadius.circular(11),
-
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 9,
                           vertical: 7,
                         ),
-
                         decoration: BoxDecoration(
                           color: successColor.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(11),
                         ),
-
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -396,9 +644,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                                     size: 16,
                                     color: successColor,
                                   ),
-
                             const SizedBox(width: 5),
-
                             Text(
                               'استخدم موقعي',
                               style: TextStyles.semiBold11.copyWith(
@@ -421,46 +667,84 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
             // ==================================================
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-
               child: SizedBox(
                 height: 230,
-
                 child: Stack(
-                  alignment: Alignment.center,
-
+                  key: _mapKey,
                   children: [
+                    // ==================================================
+                    // GOOGLE MAP
+                    // ==================================================
+
                     GoogleMap(
                       initialCameraPosition: const CameraPosition(
                         target: LatLng(29.695, 31.247),
                         zoom: 14,
                       ),
 
+                      // ==================================================
+                      // BARNSHT BOUNDS
+                      // ==================================================
                       cameraTargetBounds: CameraTargetBounds(_barnashtBounds),
 
                       minMaxZoomPreference: const MinMaxZoomPreference(
                         13.0,
                         20.0,
                       ),
+                      onTap: _onMapTap,
 
+                      // ==================================================
+                      // MAP CREATED
+                      // ==================================================
                       onMapCreated: (controller) async {
                         _mapController = controller;
 
-                        if (_mapInitialized) return;
+                        if (_mapInitialized) {
+                          return;
+                        }
 
                         _mapInitialized = true;
 
                         await Future.delayed(const Duration(milliseconds: 300));
 
-                        if (!mounted) return;
+                        if (!mounted) {
+                          return;
+                        }
 
-                        await controller.animateCamera(
-                          CameraUpdate.newLatLngBounds(_barnashtBounds, 30),
-                        );
+                        // تحديد موقع المستخدم
+                        await _initializeUserLocation();
+
+                        // لو مفيش Location
+                        if (_selectedLocation == null) {
+                          await controller.animateCamera(
+                            CameraUpdate.newLatLngBounds(_barnashtBounds, 30),
+                          );
+                        }
+
+                        await Future.delayed(const Duration(milliseconds: 150));
+
+                        await _updateMarkerScreenPosition();
                       },
 
-                      onCameraMove: _onCameraMove,
-                      onCameraIdle: _onCameraIdle,
+                      // ==================================================
+                      // CAMERA MOVE
+                      // ==================================================
+                      onCameraMove: (_) {
+                        if (!_isDraggingMarker) {
+                          _updateMarkerScreenPosition();
+                        }
+                      },
 
+                      // ==================================================
+                      // CAMERA IDLE
+                      // ==================================================
+                      onCameraIdle: () {
+                        _updateMarkerScreenPosition();
+                      },
+
+                      // ==================================================
+                      // POLYGON
+                      // ==================================================
                       polygons: {
                         Polygon(
                           polygonId: const PolygonId('barnasht_boundary'),
@@ -471,17 +755,39 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                         ),
                       },
 
+                      // ==================================================
+                      // NO GOOGLE MARKER
+                      // ==================================================
+                      markers: const {},
+
+                      // ==================================================
+                      // MY LOCATION
+                      // ==================================================
                       myLocationEnabled: true,
+
                       myLocationButtonEnabled: false,
 
+                      // ==================================================
+                      // CONTROLS
+                      // ==================================================
                       zoomControlsEnabled: false,
+
                       mapToolbarEnabled: false,
+
                       compassEnabled: false,
 
+                      // ==================================================
+                      // GESTURES
+                      // ==================================================
                       rotateGesturesEnabled: true,
+
                       scrollGesturesEnabled: true,
+
                       zoomGesturesEnabled: true,
 
+                      // ==================================================
+                      // GESTURE RECOGNIZER
+                      // ==================================================
                       gestureRecognizers:
                           <Factory<OneSequenceGestureRecognizer>>{
                             Factory<OneSequenceGestureRecognizer>(
@@ -491,21 +797,49 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                     ),
 
                     // ==================================================
-                    // CENTER MARKER
+                    // CUSTOM DRAGGABLE MARKER
                     // ==================================================
-                    IgnorePointer(
-                      child: Transform.translate(
-                        offset: const Offset(0, -14),
+                    if (_selectedLocation != null && _markerOffset != null)
+                      Positioned(
+                        left: _markerOffset!.dx,
+                        top: _markerOffset!.dy,
+                        width: _markerSize,
+                        height: _markerSize,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
 
-                        child: Icon(
-                          Icons.location_on_rounded,
-                          size: 45,
-                          color: hasLocation
-                              ? successColor
-                              : colorScheme.onSurface.withValues(alpha: 0.45),
+                          // يبدأ السحب فورًا
+                          onPanStart: _onMarkerPanStart,
+
+                          onPanUpdate: _onMarkerPanUpdate,
+
+                          onPanEnd: _onMarkerPanEnd,
+
+                          child: Image.asset(
+                            _markerAsset,
+                            width: _markerSize,
+                            height: _markerSize,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    ),
+
+                    // ==================================================
+                    // LOADING
+                    // ==================================================
+                    if (_isGettingLocation)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.white.withValues(alpha: 0.55),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                      ),
+
+                    // ==================================================
+                    // MY LOCATION BUTTON
+                    // ==================================================
                   ],
                 ),
               ),
@@ -518,41 +852,39 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
             // ==================================================
             Container(
               width: double.infinity,
-
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-
               decoration: BoxDecoration(
                 color: hasLocation
                     ? successColor.withValues(alpha: 0.06)
                     : errorColor.withValues(alpha: 0.06),
-
                 borderRadius: BorderRadius.circular(12),
               ),
-
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-
                 children: [
+                  // ==================================================
+                  // STATUS ICON
+                  // ==================================================
+
                   Icon(
                     hasLocation
                         ? Icons.location_searching_rounded
                         : Icons.location_off_rounded,
-
                     size: 18,
-
                     color: hasLocation ? successColor : errorColor,
                   ),
 
                   const SizedBox(width: 7),
 
+                  // ==================================================
+                  // STATUS TEXT
+                  // ==================================================
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-
                       children: [
                         Text(
                           hasLocation ? 'الموقع المحدد' : 'الموقع مطلوب',
-
                           style: TextStyles.semiBold11.copyWith(
                             color: hasLocation ? successColor : errorColor,
                           ),
@@ -564,8 +896,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                           hasLocation
                               ? '${_selectedLocation!.latitude.toStringAsFixed(6)} , '
                                     '${_selectedLocation!.longitude.toStringAsFixed(6)}'
-                              : 'اضغط على "استخدم موقعي" لتحديد موقع المكان',
-
+                              : 'اسحب علامة برنشتاوي إلى موقع المكان',
                           style: TextStyles.regular11.copyWith(
                             color: colorScheme.onSurface.withValues(
                               alpha: 0.75,

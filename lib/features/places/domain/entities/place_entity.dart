@@ -9,6 +9,7 @@ class PlaceEntity extends Equatable {
   final String placeName;
   final String placeAddress;
   final String placeDescription;
+  final String? phoneNumber;
 
   final double latitude;
   final double longitude;
@@ -27,6 +28,7 @@ class PlaceEntity extends Equatable {
     required this.longitude,
     required this.status,
     required this.createdAt,
+    required this.phoneNumber,
   });
 
   @override
@@ -40,5 +42,6 @@ class PlaceEntity extends Equatable {
     longitude,
     status,
     createdAt,
+    phoneNumber,
   ];
 }

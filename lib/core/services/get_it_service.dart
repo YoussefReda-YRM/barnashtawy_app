@@ -33,7 +33,9 @@ void setupGetIt() {
   // Place Repository
   // ─────────────────────────────────────────
 
-  getIt.registerSingleton<PlaceRepo>(PlaceRepoImpl(getIt<DatabaseService>()));
+  getIt.registerLazySingleton<PlaceRepo>(
+    () => PlaceRepoImpl(getIt<DatabaseService>()),
+  );
 
   getIt.registerFactory<CategoryCubit>(
     () => CategoryCubit(categoryRepo: getIt<CategoryRepo>()),

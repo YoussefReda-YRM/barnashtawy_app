@@ -8,6 +8,7 @@ class PlaceModel {
   final String placeName;
   final String placeAddress;
   final String placeDescription;
+  final String? phoneNumber;
 
   final double latitude;
   final double longitude;
@@ -25,6 +26,7 @@ class PlaceModel {
     required this.longitude,
     required this.status,
     required this.createdAt,
+    required this.phoneNumber,
   });
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +36,7 @@ class PlaceModel {
       placeName: json['placeName'] ?? '',
       placeAddress: json['placeAddress'] ?? '',
       placeDescription: json['placeDescription'] ?? '',
+      phoneNumber: json['phoneNumber'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
       status: _statusFromString(json['status']),
@@ -52,6 +55,7 @@ class PlaceModel {
       longitude: longitude,
       status: status,
       createdAt: createdAt,
+      phoneNumber: phoneNumber,
     );
   }
 
@@ -62,6 +66,7 @@ class PlaceModel {
       'placeName': placeName,
       'placeAddress': placeAddress,
       'placeDescription': placeDescription,
+      'phoneNumber': phoneNumber,
       'latitude': latitude,
       'longitude': longitude,
       'status': status.name,
@@ -79,6 +84,8 @@ class PlaceModel {
       'placeName': placeName,
       'placeAddress': placeAddress,
       'placeDescription': placeDescription,
+      'phoneNumber': phoneNumber,
+
       'latitude': latitude,
       'longitude': longitude,
 

@@ -6,6 +6,7 @@ PlaceEntity getDummyPlace() {
     placeName: 'Place Name',
     placeAddress: 'Place Address',
     placeDescription: 'Place Description',
+    phoneNumber: "+201234567890",
     latitude: 0.0,
     longitude: 0.0,
     categoryId: '1',

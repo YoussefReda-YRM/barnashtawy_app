@@ -1,3 +1,4 @@
+import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cubit.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_state.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/widgets/custom_app_bar_add_place_widget.dart';
@@ -22,6 +23,8 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
 
   final TextEditingController _nameController = TextEditingController();
 
+  final TextEditingController _phoneController = TextEditingController();
+
   final TextEditingController _descriptionController = TextEditingController();
 
   final TextEditingController _addressController = TextEditingController();
@@ -32,6 +35,7 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
   @override
   void dispose() {
     _nameController.dispose();
+    _phoneController.dispose();
     _descriptionController.dispose();
     _addressController.dispose();
 
@@ -58,7 +62,11 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
     // ============================================================
 
     if (_selectedLatitude == null || _selectedLongitude == null) {
-      _showLocationError();
+      buildBar(
+        context,
+        'من فضلك قم بتحديد موقع المكان على الخريطة',
+        type: SnackBarType.warning,
+      );
       return;
     }
 
@@ -71,30 +79,15 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
       placeName: _nameController.text,
       placeAddress: _addressController.text,
       placeDescription: _descriptionController.text,
+      phoneNumber: _phoneController.text,
       latitude: _selectedLatitude!,
       longitude: _selectedLongitude!,
     );
   }
 
-  // ============================================================
-  // LOCATION ERROR
-  // ============================================================
-
-  void _showLocationError() {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('من فضلك قم بتحديد موقع المكان على الخريطة'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isLoading = context.watch<AddPlaceCubit>().state is AddPlaceLoading;
-    // String categoryName = getTitle(categoryName: widget.category.name);
 
     return Column(
       children: [
@@ -152,6 +145,33 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
 
                       if (value.trim().length < 2) {
                         return 'اسم المكان قصير جدًا';
+                      }
+
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ==================================================
+                  // PHONE
+                  // ==================================================
+                  CustomTextFormFieldAndLabel(
+                    label: 'رقم الموبايل (اختياري)',
+                    hint: 'اكتب رقم موبايل المكان',
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    isRequired: false,
+                    validator: (value) {
+                      final phone = value?.trim() ?? '';
+
+                      // الرقم اختياري
+                      if (phone.isEmpty) {
+                        return null;
+                      }
+
+                      if (!RegExp(r'^01[0125][0-9]{8}$').hasMatch(phone)) {
+                        return 'من فضلك اكتب رقم موبايل مصري صحيح';
                       }
 
                       return null;

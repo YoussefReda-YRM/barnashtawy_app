@@ -1,4 +1,5 @@
-import 'package:barnasht_app/features/add_place/presentation/views/widgets/open_location.dart';
+import 'package:barnasht_app/core/helper_functions/mak_phone_call.dart';
+import 'package:barnasht_app/core/helper_functions/open_location.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:barnasht_app/features/places/presentation/cubits/favorite_place_cubit.dart';
@@ -47,17 +48,11 @@ class CustomPlaceListViewBuilder extends StatelessWidget {
     Navigator.pushNamed(
       context,
       DetailsPlaceView.routeName,
-      arguments: {
-        'place': place,
-        'placeImage': category.image,
-      },
+      arguments: {'place': place, 'placeImage': category.image},
     );
   }
 
-  void _toggleFavorite(
-    BuildContext context,
-    PlaceEntity place,
-  ) {
+  void _toggleFavorite(BuildContext context, PlaceEntity place) {
     context.read<FavoriteCubit>().toggleFavorite(place.id);
   }
 
@@ -89,23 +84,16 @@ class CustomPlaceListViewBuilder extends StatelessWidget {
                 isFavorite: isFavorite,
                 placeImage: placeCategory.image,
                 onTap: () {
-                  _openPlace(
-                    context,
-                    place,
-                    placeCategory,
-                  );
+                  _openPlace(context, place, placeCategory);
                 },
                 onLocationPressed: () {
-                  openLocation(
-                    context,
-                    place,
-                  );
+                  openLocation(context, place);
                 },
                 onFavoritePressed: () {
-                  _toggleFavorite(
-                    context,
-                    place,
-                  );
+                  _toggleFavorite(context, place);
+                },
+                onPhonePressed: () {
+                  makePhoneCall(place.phoneNumber!);
                 },
               );
             },

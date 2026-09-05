@@ -10,6 +10,7 @@ class PlaceCard extends StatelessWidget {
     this.onTap,
     this.onLocationPressed,
     this.onFavoritePressed,
+    this.onPhonePressed,
     required this.placeImage,
     this.isFavorite = false,
   });
@@ -18,6 +19,7 @@ class PlaceCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLocationPressed;
   final VoidCallback? onFavoritePressed;
+  final VoidCallback? onPhonePressed;
   final String placeImage;
   final bool isFavorite;
 
@@ -25,8 +27,12 @@ class PlaceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // Favorite is a semantic color, so it remains red in both themes.
     final favoriteColor = colorScheme.error;
+
+    final hasPhoneNumber =
+        place.phoneNumber != null &&
+        place.phoneNumber!.trim().isNotEmpty;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -66,7 +72,10 @@ class PlaceCard extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(6.0),
                         child: placeImage.trim().isNotEmpty
-                            ? SvgPicture.asset(placeImage, fit: BoxFit.contain)
+                            ? SvgPicture.asset(
+                                placeImage,
+                                fit: BoxFit.contain,
+                              )
                             : Icon(
                                 Icons.place_outlined,
                                 size: 28,
@@ -169,6 +178,28 @@ class PlaceCard extends StatelessWidget {
                         ),
                       ),
                     ),
+
+                    if (hasPhoneNumber) ...[
+                      const SizedBox(width: 8),
+
+                      InkWell(
+                        onTap: onPhonePressed,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Colors.green.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.phone_rounded,
+                            size: 18,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(width: 8),
 

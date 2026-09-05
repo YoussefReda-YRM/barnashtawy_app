@@ -9,30 +9,27 @@ class FireStoreService implements DatabaseService {
   // ============================================================
 
   @override
-Future<String> addData({
-  required String path,
-  required Map<String, dynamic> data,
-  String? documentId,
-}) async {
-  final collection = firestore.collection(path);
+  Future<String> addData({
+    required String path,
+    required Map<String, dynamic> data,
+    String? documentId,
+  }) async {
+    final collection = firestore.collection(path);
 
-  final String id;
+    final String id;
 
-  if (documentId != null && documentId.isNotEmpty) {
-    id = documentId;
-  } else {
-    id = collection.doc().id;
+    if (documentId != null && documentId.isNotEmpty) {
+      id = documentId;
+    } else {
+      id = collection.doc().id;
+    }
+
+    final dataWithId = {...data, 'id': id};
+
+    await collection.doc(id).set(dataWithId);
+
+    return id;
   }
-
-  final dataWithId = {
-    ...data,
-    'id': id,
-  };
-
-  await collection.doc(id).set(dataWithId);
-
-  return id;
-}
   // ============================================================
   // GET DATA
   // ============================================================

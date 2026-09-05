@@ -9,6 +9,8 @@ class CustomTextFormFieldAndLabel extends StatelessWidget {
     required this.controller,
     this.maxLines = 1,
     this.validator,
+    this.keyboardType,
+    this.isRequired = true,
   });
 
   final String label;
@@ -16,6 +18,8 @@ class CustomTextFormFieldAndLabel extends StatelessWidget {
   final TextEditingController controller;
   final int maxLines;
   final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
+  final bool isRequired;
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +46,12 @@ class CustomTextFormFieldAndLabel extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              Text(
-                '*',
-                style: TextStyles.semiBold13.copyWith(color: Colors.red),
-              ),
+              isRequired
+                  ? Text(
+                      '*',
+                      style: TextStyles.semiBold13.copyWith(color: Colors.red),
+                    )
+                  : SizedBox.shrink(),
             ],
           ),
         ),
@@ -59,6 +65,7 @@ class CustomTextFormFieldAndLabel extends StatelessWidget {
           controller: controller,
           validator: validator,
           maxLines: maxLines,
+          keyboardType: keyboardType,
 
           textInputAction: maxLines > 1
               ? TextInputAction.newline
