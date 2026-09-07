@@ -1,12 +1,13 @@
+import 'package:barnasht_app/core/helper_functions/mak_phone_call.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/core/widgets/custom_button_widget.dart';
 import 'package:barnasht_app/core/widgets/custom_header_icon_widget.dart';
 import 'package:barnasht_app/core/widgets/custom_logo_widget.dart';
 import 'package:barnasht_app/core/helper_functions/open_location.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
+import 'package:barnasht_app/features/places/presentation/views/widgets/info_card_details_pace.dart';
 import 'package:flutter/material.dart';
 import 'package:svg_flutter/svg.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class DetailsPlaceView extends StatelessWidget {
   const DetailsPlaceView({
@@ -19,34 +20,6 @@ class DetailsPlaceView extends StatelessWidget {
 
   final PlaceEntity place;
   final String placeImage;
-
-  Future<void> _makePhoneCall(BuildContext context) async {
-    final phoneNumber = place.phoneNumber?.trim();
-
-    if (phoneNumber == null || phoneNumber.isEmpty) {
-      return;
-    }
-
-    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-
-    try {
-      if (await canLaunchUrl(phoneUri)) {
-        await launchUrl(phoneUri);
-      } else {
-        if (!context.mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('لا يمكن فتح تطبيق المكالمات')),
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ أثناء محاولة الاتصال')),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,10 +76,6 @@ class DetailsPlaceView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ==========================================================
-                      // PLACE HEADER
-                      // ==========================================================
-
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
@@ -130,10 +99,6 @@ class DetailsPlaceView extends StatelessWidget {
                         ),
                         child: Column(
                           children: [
-                            // ======================================================
-                            // ICON
-                            // ======================================================
-
                             Container(
                               width: 120,
                               height: 120,
@@ -149,9 +114,6 @@ class DetailsPlaceView extends StatelessWidget {
 
                             const SizedBox(height: 8),
 
-                            // ======================================================
-                            // NAME
-                            // ======================================================
                             Text(
                               place.placeName,
                               textAlign: TextAlign.center,
@@ -162,9 +124,6 @@ class DetailsPlaceView extends StatelessWidget {
 
                             const SizedBox(height: 8),
 
-                            // ======================================================
-                            // DESCRIPTION
-                            // ======================================================
                             Text(
                               place.placeDescription,
                               textAlign: TextAlign.center,
@@ -181,9 +140,6 @@ class DetailsPlaceView extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // ==========================================================
-                      // INFORMATION TITLE
-                      // ==========================================================
                       Text(
                         'معلومات المكان',
                         style: TextStyles.semiBold16.copyWith(
@@ -193,10 +149,7 @@ class DetailsPlaceView extends StatelessWidget {
 
                       const SizedBox(height: 12),
 
-                      // ==========================================================
-                      // ADDRESS
-                      // ==========================================================
-                      _InfoCard(
+                      InfoCard(
                         icon: Icons.location_on_outlined,
                         title: 'العنوان',
                         value: place.placeAddress,
@@ -204,25 +157,20 @@ class DetailsPlaceView extends StatelessWidget {
 
                       const SizedBox(height: 10),
 
-                      // ==========================================================
-                      // PHONE NUMBER
-                      // ==========================================================
                       if (hasPhoneNumber) ...[
-                        _InfoCard(
+                        InfoCard(
                           icon: Icons.phone_rounded,
                           title: 'رقم الهاتف',
                           value: place.phoneNumber!.trim(),
                           iconColor: Colors.green,
-                          onTap: () => _makePhoneCall(context),
+                          onTap: () =>
+                              makePhoneCall(context, place.phoneNumber!),
                         ),
 
                         const SizedBox(height: 10),
                       ],
 
-                      // ==========================================================
-                      // LOCATION
-                      // ==========================================================
-                      _InfoCard(
+                      InfoCard(
                         icon: Icons.my_location_rounded,
                         title: 'الموقع',
                         value:
@@ -231,9 +179,6 @@ class DetailsPlaceView extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // ==========================================================
-                      // LOCATION BUTTON
-                      // ==========================================================
                       CustomButtonWidget(
                         text: 'الوصول للمكان',
                         icon: Icons.navigation_rounded,
@@ -241,92 +186,6 @@ class DetailsPlaceView extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================================
-// INFO CARD
-// ============================================================================
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({
-    required this.icon,
-    required this.title,
-    required this.value,
-    this.iconColor,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String value;
-  final Color? iconColor;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final effectiveIconColor = iconColor ?? colorScheme.primary;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          width: double.infinity,
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.12),
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: effectiveIconColor.withValues(alpha: 0.09),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: effectiveIconColor, size: 21),
-              ),
-
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyles.regular11.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.60),
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      value,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyles.semiBold13.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ],

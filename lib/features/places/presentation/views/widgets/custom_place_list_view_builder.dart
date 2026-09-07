@@ -93,7 +93,7 @@ class CustomPlaceListViewBuilder extends StatelessWidget {
                   _toggleFavorite(context, place);
                 },
                 onPhonePressed: () {
-                  makePhoneCall(place.phoneNumber!);
+                  makePhoneCall(context, place.phoneNumber!);
                 },
               );
             },

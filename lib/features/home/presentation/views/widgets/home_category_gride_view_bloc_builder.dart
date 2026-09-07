@@ -1,4 +1,3 @@
-
 import 'package:barnasht_app/core/helper_functions/get_dummy_category.dart';
 import 'package:barnasht_app/core/widgets/custom_error_widget.dart';
 import 'package:barnasht_app/features/home/presentation/cubits/category_cubit.dart';
@@ -16,41 +15,21 @@ class HomeCategoryGrideViewBlocBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CategoryCubit, CategoryState>(
       builder: (context, state) {
-        // ============================================================
-        // LOADING
-        // ============================================================
-
         if (state is CategoryLoading) {
           return Skeletonizer.sliver(
             enabled: true,
-            child: HomeCategoryGrideView(
-              categories: getDummyCategories(),
-            ),
+            child: HomeCategoryGrideView(categories: getDummyCategories()),
           );
         }
-
-        // ============================================================
-        // FAILURE
-        // ============================================================
 
         if (state is CategoryFailure) {
           return SliverToBoxAdapter(
-            child: CustomErrorWidget(
-              text: state.errorMessage,
-            ),
+            child: CustomErrorWidget(text: state.errorMessage),
           );
         }
 
-        // ============================================================
-        // SUCCESS
-        // ============================================================
-
         if (state is CategorySuccess) {
           final categories = state.categories;
-
-          // ==========================================================
-          // EMPTY
-          // ==========================================================
 
           if (categories.isEmpty) {
             return const SliverToBoxAdapter(
@@ -58,24 +37,11 @@ class HomeCategoryGrideViewBlocBuilder extends StatelessWidget {
             );
           }
 
-          // ==========================================================
-          // DATA
-          // ==========================================================
-
-          return HomeCategoryGrideView(
-            categories: categories,
-          );
+          return HomeCategoryGrideView(categories: categories);
         }
 
-        // ============================================================
-        // DEFAULT
-        // ============================================================
-
-        return const SliverToBoxAdapter(
-          child: SizedBox.shrink(),
-        );
+        return const SliverToBoxAdapter(child: SizedBox.shrink());
       },
     );
   }
 }
-
