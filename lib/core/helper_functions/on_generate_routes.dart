@@ -2,6 +2,7 @@ import 'package:barnasht_app/core/services/get_it_service.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cubit.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/add_place_view.dart';
+import 'package:barnasht_app/features/auth/domain/entities/auth_entity.dart';
 import 'package:barnasht_app/features/auth/presentation/views/signin_view.dart';
 import 'package:barnasht_app/features/auth/presentation/views/signup_view.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
@@ -11,6 +12,8 @@ import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:barnasht_app/features/places/presentation/cubits/place_cubit.dart';
 import 'package:barnasht_app/features/places/presentation/views/details_place_view.dart';
 import 'package:barnasht_app/features/places/presentation/views/place_view.dart';
+import 'package:barnasht_app/features/profile/presentation/cubits/profile_cubit.dart';
+import 'package:barnasht_app/features/profile/presentation/views/edit_profile_view.dart';
 import 'package:barnasht_app/features/profile/presentation/views/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +30,17 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
 
     case ProfileView.routeName:
       return MaterialPageRoute(builder: (context) => const ProfileView());
+
+    case EditProfileView.routeName:
+      final args = settings.arguments as Map<String, dynamic>;
+      final user = args['user'] as UserEntity;
+      final profileCubit = args['profileCubit'] as ProfileCubit;
+      return MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: profileCubit,
+          child: EditProfileView(user: user),
+        ),
+      );
 
     case PlaceView.routeName:
       return MaterialPageRoute(

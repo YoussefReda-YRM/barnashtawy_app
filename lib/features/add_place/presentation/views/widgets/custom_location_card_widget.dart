@@ -12,10 +12,12 @@ class CustomLocationCardWidget extends StatefulWidget {
     super.key,
     required this.onLocationChanged,
     this.hasLocation = false,
+    this.initialLocation,
   });
 
   final ValueChanged<LatLng?> onLocationChanged;
   final bool hasLocation;
+  final LatLng? initialLocation;
 
   @override
   State<CustomLocationCardWidget> createState() =>
@@ -106,6 +108,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
   LatLng? _pinLocation;
 
   LatLng? _previousLocation;
+
   // ============================================================
   // DRAG LOCATION
   // ============================================================
@@ -130,10 +133,24 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
   static const String _markerAsset = Assets.imagesAppLogoTransparent;
 
-  // حجم الـ Marker على الشاشة
   static const double _markerSize = 70;
 
   final GlobalKey _mapKey = GlobalKey();
+
+  // ============================================================
+  // INIT STATE
+  // ============================================================
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.initialLocation != null &&
+        _isInsideBarnasht(widget.initialLocation!)) {
+      _selectedLocation = widget.initialLocation;
+      _pinLocation = widget.initialLocation;
+    }
+  }
 
   // ============================================================
   // UPDATE MARKER SCREEN POSITION
@@ -162,6 +179,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       debugPrint('Failed to update marker screen position: $e');
     }
   }
+
   // ============================================================
   // MARKER DRAG START
   // ============================================================
@@ -332,10 +350,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
       final LatLng location = LatLng(position.latitude, position.longitude);
 
-      // ========================================================
-      // CHECK BARNSHT
-      // ========================================================
-
       if (!_isInsideBarnasht(location)) {
         if (!mounted) return;
 
@@ -349,10 +363,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       }
 
       _updateSelectedLocation(location);
-
-      // ========================================================
-      // MOVE CAMERA
-      // ========================================================
 
       if (_mapController != null) {
         await _mapController!.animateCamera(
@@ -383,6 +393,12 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
   // ============================================================
 
   Future<void> _initializeUserLocation() async {
+    // في حالة التعديل، لا نستبدل موقع المكان القديم
+    // بموقع المستخدم الحالي.
+    if (widget.initialLocation != null) {
+      return;
+    }
+
     try {
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
@@ -419,8 +435,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
         return;
       }
 
-      // يظهر الـ Pin في موقع المستخدم
-      // لكن لا يتم اعتبار الموقع محددًا
       setState(() {
         _pinLocation = location;
       });
@@ -452,11 +466,9 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       j = i++
     ) {
       final double xi = _barnashtBoundary[i].latitude;
-
       final double yi = _barnashtBoundary[i].longitude;
 
       final double xj = _barnashtBoundary[j].latitude;
-
       final double yj = _barnashtBoundary[j].longitude;
 
       final bool intersect =
@@ -491,6 +503,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
     _updateSelectedLocation(location);
   }
+
   // ============================================================
   // BUILD
   // ============================================================
@@ -501,9 +514,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
     final hasLocation = _selectedLocation != null;
 
-    // Semantic colors
     final successColor = colorScheme.primary;
-
     final errorColor = colorScheme.error;
 
     return Container(
@@ -537,10 +548,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
               child: Row(
                 children: [
-                  // ==================================================
-                  // LOCATION ICON
-                  // ==================================================
-
                   Container(
                     width: 38,
                     height: 38,
@@ -557,9 +564,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
                   const SizedBox(width: 9),
 
-                  // ==================================================
-                  // TITLE
-                  // ==================================================
                   Expanded(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -585,9 +589,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
                   const SizedBox(width: 8),
 
-                  // ==================================================
-                  // USE MY LOCATION
-                  // ==================================================
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -647,30 +648,23 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                 child: Stack(
                   key: _mapKey,
                   children: [
-                    // ==================================================
-                    // GOOGLE MAP
-                    // ==================================================
-
                     GoogleMap(
-                      initialCameraPosition: const CameraPosition(
-                        target: LatLng(29.695, 31.247),
-                        zoom: 14,
+                      initialCameraPosition: CameraPosition(
+                        target:
+                            widget.initialLocation ??
+                            const LatLng(29.695, 31.247),
+                        zoom: widget.initialLocation != null ? 18 : 14,
                       ),
 
-                      // ==================================================
-                      // BARNSHT BOUNDS
-                      // ==================================================
                       cameraTargetBounds: CameraTargetBounds(_barnashtBounds),
 
                       minMaxZoomPreference: const MinMaxZoomPreference(
                         13.0,
                         20.0,
                       ),
+
                       onTap: _onMapTap,
 
-                      // ==================================================
-                      // MAP CREATED
-                      // ==================================================
                       onMapCreated: (controller) async {
                         _mapController = controller;
 
@@ -682,12 +676,23 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
                         if (!mounted) return;
 
-                        await _initializeUserLocation();
-
-                        if (_pinLocation == null) {
+                        if (widget.initialLocation != null) {
                           await controller.animateCamera(
-                            CameraUpdate.newLatLngBounds(_barnashtBounds, 30),
+                            CameraUpdate.newCameraPosition(
+                              CameraPosition(
+                                target: widget.initialLocation!,
+                                zoom: 18,
+                              ),
+                            ),
                           );
+                        } else {
+                          await _initializeUserLocation();
+
+                          if (_pinLocation == null) {
+                            await controller.animateCamera(
+                              CameraUpdate.newLatLngBounds(_barnashtBounds, 30),
+                            );
+                          }
                         }
 
                         await Future.delayed(const Duration(milliseconds: 150));
@@ -695,25 +700,16 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                         await _updateMarkerScreenPosition();
                       },
 
-                      // ==================================================
-                      // CAMERA MOVE
-                      // ==================================================
                       onCameraMove: (_) {
                         if (!_isDraggingMarker) {
                           _updateMarkerScreenPosition();
                         }
                       },
 
-                      // ==================================================
-                      // CAMERA IDLE
-                      // ==================================================
                       onCameraIdle: () {
                         _updateMarkerScreenPosition();
                       },
 
-                      // ==================================================
-                      // POLYGON
-                      // ==================================================
                       polygons: {
                         Polygon(
                           polygonId: const PolygonId('barnasht_boundary'),
@@ -724,39 +720,19 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                         ),
                       },
 
-                      // ==================================================
-                      // NO GOOGLE MARKER
-                      // ==================================================
                       markers: const {},
 
-                      // ==================================================
-                      // MY LOCATION
-                      // ==================================================
                       myLocationEnabled: true,
-
                       myLocationButtonEnabled: false,
 
-                      // ==================================================
-                      // CONTROLS
-                      // ==================================================
                       zoomControlsEnabled: false,
-
                       mapToolbarEnabled: false,
-
                       compassEnabled: false,
 
-                      // ==================================================
-                      // GESTURES
-                      // ==================================================
                       rotateGesturesEnabled: true,
-
                       scrollGesturesEnabled: true,
-
                       zoomGesturesEnabled: true,
 
-                      // ==================================================
-                      // GESTURE RECOGNIZER
-                      // ==================================================
                       gestureRecognizers:
                           <Factory<OneSequenceGestureRecognizer>>{
                             Factory<OneSequenceGestureRecognizer>(
@@ -800,10 +776,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                           ),
                         ),
                       ),
-
-                    // ==================================================
-                    // MY LOCATION BUTTON
-                    // ==================================================
                   ],
                 ),
               ),
@@ -826,10 +798,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ==================================================
-                  // STATUS ICON
-                  // ==================================================
-
                   Icon(
                     hasLocation
                         ? Icons.location_searching_rounded
@@ -840,9 +808,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
                   const SizedBox(width: 7),
 
-                  // ==================================================
-                  // STATUS TEXT
-                  // ==================================================
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

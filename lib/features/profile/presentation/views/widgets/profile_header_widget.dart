@@ -1,6 +1,9 @@
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/auth/domain/entities/auth_entity.dart';
+import 'package:barnasht_app/features/profile/presentation/cubits/profile_cubit.dart';
+import 'package:barnasht_app/features/profile/presentation/views/edit_profile_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
   const ProfileHeaderWidget({
@@ -67,7 +70,7 @@ class ProfileHeaderWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'أهلاً، $userName 👋',
+                  userName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyles.bold16.copyWith(
@@ -142,7 +145,16 @@ class ProfileHeaderWidget extends StatelessWidget {
             color: colorScheme.surface.withValues(alpha: 0.75),
             borderRadius: BorderRadius.circular(13),
             child: InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  EditProfileView.routeName,
+                  arguments: {
+                    'user': user,
+                    'profileCubit': context.read<ProfileCubit>(),
+                  },
+                );
+              },
               borderRadius: BorderRadius.circular(13),
               child: Padding(
                 padding: const EdgeInsets.all(10),

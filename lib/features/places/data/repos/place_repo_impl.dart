@@ -5,6 +5,7 @@ import 'package:barnasht_app/core/utils/back_end_point.dart';
 import 'package:barnasht_app/features/places/data/models/place_model.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:barnasht_app/features/places/domain/repos/place_repo.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 
 class PlaceRepoImpl extends PlaceRepo {
@@ -312,6 +313,72 @@ class PlaceRepoImpl extends PlaceRepo {
       return right(places);
     } catch (e) {
       return left(ServerFailure('Failed to get my places: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updatePlace({
+    required PlaceEntity place,
+  }) async {
+    try {
+      final currentUser = firebaseAuthService.currentUser;
+
+      if (currentUser == null) {
+        return left(ServerFailure('يجب تسجيل الدخول أولاً.'));
+      }
+
+      if (place.userId != currentUser.uid) {
+        return left(ServerFailure('لا يمكنك تعديل هذا المكان.'));
+      }
+
+      await databaseService.updateData(
+        path: BackendEndpoint.placesPath,
+        documentId: place.id,
+        data: {
+          'categoryId': place.categoryId,
+          'userId': currentUser.uid,
+          'placeName': place.placeName,
+          'placeAddress': place.placeAddress,
+          'placeDescription': place.placeDescription,
+          'phoneNumber': place.phoneNumber,
+          'latitude': place.latitude,
+          'longitude': place.longitude,
+
+          // أي تعديل يرجع المكان للمراجعة.
+          'status': PlaceStatus.pending.name,
+
+          'updatedAt': FieldValue.serverTimestamp(),
+
+          // إعادة ضبط بيانات المراجعة القديمة.
+          'reviewedAt': null,
+          'reviewedBy': null,
+          'rejectionReason': null,
+        },
+      );
+
+      return right(null);
+    } catch (e) {
+      return left(ServerFailure('حدث خطأ أثناء تعديل المكان.'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deletePlace({required String placeId}) async {
+    try {
+      final currentUser = firebaseAuthService.currentUser;
+
+      if (currentUser == null) {
+        return left(ServerFailure('يجب تسجيل الدخول أولاً.'));
+      }
+
+      await databaseService.deleteData(
+        path: BackendEndpoint.placesPath,
+        documentId: placeId,
+      );
+
+      return right(null);
+    } catch (e) {
+      return left(ServerFailure('حدث خطأ أثناء حذف المكان.'));
     }
   }
 }

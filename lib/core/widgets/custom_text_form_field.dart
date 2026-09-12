@@ -14,6 +14,7 @@ class CustomTextFormField extends StatelessWidget {
     this.onSaved,
 
     this.obscureText = false,
+    this.readOnly = false,
   });
 
   final TextEditingController? controller;
@@ -25,10 +26,12 @@ class CustomTextFormField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final void Function(String?)? onSaved;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      readOnly: readOnly,
       obscureText: obscureText,
 
       controller: controller,

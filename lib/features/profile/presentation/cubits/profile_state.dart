@@ -26,3 +26,7 @@ class ProfileFailure extends ProfileState {
 
   const ProfileFailure({required this.message});
 }
+
+class ProfileUpdating extends ProfileState {
+  const ProfileUpdating();
+}

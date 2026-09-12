@@ -58,9 +58,7 @@ class AuthRepoImpl extends AuthRepo {
         'Exception in AuthRepoImpl.createUserWithEmailAndPassword: ${e.toString()}',
       );
 
-      return left(
-        ServerFailure('حدث خطأ ما. الرجاء المحاولة مرة اخرى.'),
-      );
+      return left(ServerFailure('حدث خطأ ما. الرجاء المحاولة مرة اخرى.'));
     }
   }
 
@@ -93,9 +91,7 @@ class AuthRepoImpl extends AuthRepo {
         'Exception in AuthRepoImpl.createUserWithEmailAndPassword: ${e.toString()}',
       );
 
-      return left(
-        ServerFailure('حدث خطأ ما. الرجاء المحاولة مرة اخرى.'),
-      );
+      return left(ServerFailure('حدث خطأ ما. الرجاء المحاولة مرة اخرى.'));
     }
   }
 
@@ -127,20 +123,14 @@ class AuthRepoImpl extends AuthRepo {
     } catch (e) {
       await deleteUser(user);
 
-      log(
-        'Exception in AuthRepoImpl.signinWithGoogle: ${e.toString()}',
-      );
+      log('Exception in AuthRepoImpl.signinWithGoogle: ${e.toString()}');
 
-      return left(
-        ServerFailure('حدث خطأ ما. الرجاء المحاولة مرة اخرى.'),
-      );
+      return left(ServerFailure('حدث خطأ ما. الرجاء المحاولة مرة اخرى.'));
     }
   }
 
   @override
-  Future<void> addUserData({
-    required UserEntity user,
-  }) async {
+  Future<void> addUserData({required UserEntity user}) async {
     await databaseService.addData(
       path: BackendEndpoint.addUserData,
       data: UserModel.fromEntity(user).toMap(),
@@ -149,9 +139,7 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   @override
-  Future<UserEntity> getUserData({
-    required String uid,
-  }) async {
+  Future<UserEntity> getUserData({required String uid}) async {
     final userData = await databaseService.getData(
       path: BackendEndpoint.getUsersData,
       documentId: uid,
@@ -161,13 +149,20 @@ class AuthRepoImpl extends AuthRepo {
   }
 
   @override
-  Future<void> saveUserData({
-    required UserEntity user,
-  }) async {
-    final jsonData = jsonEncode(
-      UserModel.fromEntity(user).toMap(),
-    );
+  Future<void> saveUserData({required UserEntity user}) async {
+    final jsonData = jsonEncode(UserModel.fromEntity(user).toMap());
 
     await Prefs.setString(kUserData, jsonData);
+  }
+
+  @override
+  Future<void> updateUserData({required UserEntity user}) async {
+    await databaseService.updateData(
+      path: BackendEndpoint.addUserData,
+      documentId: user.uId,
+      data: UserModel.fromEntity(user).toMap(),
+    );
+
+    await saveUserData(user: user);
   }
 }

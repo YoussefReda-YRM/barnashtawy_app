@@ -1,3 +1,4 @@
+import 'package:barnasht_app/core/helper_functions/mak_phone_call.dart';
 import 'package:barnasht_app/core/helper_functions/open_location.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
@@ -24,6 +25,9 @@ class MyPlaceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    final hasPhoneNumber =
+        place.phoneNumber != null && place.phoneNumber!.trim().isNotEmpty;
 
     return Material(
       color: Colors.transparent,
@@ -64,9 +68,7 @@ class MyPlaceCard extends StatelessWidget {
                       size: 27,
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,15 +85,11 @@ class MyPlaceCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-
                             const SizedBox(width: 8),
-
                             StatusBadge(status: status, color: statusColor),
                           ],
                         ),
-
                         const SizedBox(height: 6),
-
                         Row(
                           children: [
                             Icon(
@@ -101,9 +99,7 @@ class MyPlaceCard extends StatelessWidget {
                                 alpha: 0.50,
                               ),
                             ),
-
                             const SizedBox(width: 5),
-
                             Expanded(
                               child: Text(
                                 place.categoryId,
@@ -126,6 +122,9 @@ class MyPlaceCard extends StatelessWidget {
 
               const SizedBox(height: 12),
 
+              // ========================================================
+              // ADDRESS
+              // ========================================================
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -142,9 +141,7 @@ class MyPlaceCard extends StatelessWidget {
                       size: 17,
                       color: colorScheme.primary,
                     ),
-
                     const SizedBox(width: 7),
-
                     Expanded(
                       child: Text(
                         place.placeAddress,
@@ -155,9 +152,7 @@ class MyPlaceCard extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 8),
-
                     Material(
                       color: colorScheme.primary.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(9),
@@ -178,6 +173,58 @@ class MyPlaceCard extends StatelessWidget {
                 ),
               ),
 
+              if (hasPhoneNumber) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.phone_outlined,
+                        size: 17,
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: Text(
+                          place.phoneNumber!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyles.regular11.copyWith(
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Material(
+                        color: colorScheme.primary.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(9),
+                        child: InkWell(
+                          onTap: () =>
+                              makePhoneCall(context, place.phoneNumber!),
+                          borderRadius: BorderRadius.circular(9),
+                          child: Padding(
+                            padding: const EdgeInsets.all(7),
+                            child: Icon(
+                              Icons.call_rounded,
+                              size: 18,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 12),
 
               // ========================================================
@@ -193,9 +240,7 @@ class MyPlaceCard extends StatelessWidget {
                       onTap: onEdit,
                     ),
                   ),
-
                   const SizedBox(width: 8),
-
                   Expanded(
                     child: PlaceActionButton(
                       icon: Icons.delete_outline_rounded,

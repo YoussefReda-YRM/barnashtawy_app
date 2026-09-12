@@ -2,6 +2,8 @@ import 'package:barnasht_app/core/services/firebase_auth_service.dart';
 import 'package:barnasht_app/core/services/get_it_service.dart';
 import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:barnasht_app/core/widgets/custom_app_bar.dart';
+import 'package:barnasht_app/features/home/presentation/cubits/category_cubit.dart';
+import 'package:barnasht_app/features/home/presentation/cubits/category_state.dart';
 import 'package:barnasht_app/features/profile/presentation/cubits/profile_cubit.dart';
 import 'package:barnasht_app/features/profile/presentation/cubits/profile_state.dart';
 import 'package:barnasht_app/features/profile/presentation/views/widgets/profile_loading_view.dart';
@@ -26,16 +28,9 @@ class ProfileView extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              customAppBar(
-                context,
-                title: 'الملف الشخصي',
-              ),
+              customAppBar(context, title: 'الملف الشخصي'),
               const Expanded(
-                child: Center(
-                  child: Text(
-                    'يجب تسجيل الدخول أولاً',
-                  ),
-                ),
+                child: Center(child: Text('يجب تسجيل الدخول أولاً')),
               ),
             ],
           ),
@@ -43,33 +38,33 @@ class ProfileView extends StatelessWidget {
       );
     }
 
-    return BlocProvider(
-      create: (_) => getIt<ProfileCubit>()
-        ..getProfile(
-          uid: currentUser.uid,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) =>
+              getIt<ProfileCubit>()..getProfile(uid: currentUser.uid),
         ),
+        BlocProvider(create: (_) => getIt<CategoryCubit>()..getCategories()),
+      ],
       child: Scaffold(
         backgroundColor: colorScheme.surface,
         body: SafeArea(
           child: Column(
             children: [
-              customAppBar(
-                context,
-                title: 'الملف الشخصي',
-              ),
+              customAppBar(context, title: 'الملف الشخصي'),
               Expanded(
                 child: BlocBuilder<ProfileCubit, ProfileState>(
-                  builder: (context, state) {
-                    if (state is ProfileLoading) {
+                  builder: (context, profileState) {
+                    if (profileState is ProfileLoading) {
                       return const ProfileLoadingView();
                     }
 
-                    if (state is ProfileFailure) {
+                    if (profileState is ProfileFailure) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (context.mounted) {
                           buildBar(
                             context,
-                            state.message,
+                            profileState.message,
                             type: SnackBarType.error,
                           );
                         }
@@ -79,17 +74,43 @@ class ProfileView extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(24),
                           child: Text(
-                            state.message,
+                            profileState.message,
                             textAlign: TextAlign.center,
                           ),
                         ),
                       );
                     }
 
-                    if (state is ProfileSuccess) {
-                      return ProfileViewBody(
-                        user: state.user,
-                        places: state.places,
+                    if (profileState is ProfileSuccess) {
+                      return BlocBuilder<CategoryCubit, CategoryState>(
+                        builder: (context, categoryState) {
+                          if (categoryState is CategoryLoading ||
+                              categoryState is CategoryInitial) {
+                            return const ProfileLoadingView();
+                          }
+
+                          if (categoryState is CategoryFailure) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Text(
+                                  categoryState.errorMessage,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            );
+                          }
+
+                          if (categoryState is CategorySuccess) {
+                            return ProfileViewBody(
+                              user: profileState.user,
+                              places: profileState.places,
+                              categories: categoryState.categories,
+                            );
+                          }
+
+                          return const SizedBox();
+                        },
                       );
                     }
 

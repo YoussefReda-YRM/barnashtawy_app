@@ -2,15 +2,25 @@ import 'package:barnasht_app/core/services/get_it_service.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cubit.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/widgets/add_place_view_body_bloc_consumer.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
+import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddPlaceView extends StatelessWidget {
-  const AddPlaceView({super.key, required this.category});
+  const AddPlaceView({
+    super.key,
+    required this.category,
+    this.place,
+    this.onUpdate,
+  });
 
   final CategoryEntity category;
+  final PlaceEntity? place;
+  final Future<void> Function(PlaceEntity place)? onUpdate;
 
   static const String routeName = 'add_place_view';
+
+  bool get isEditing => place != null;
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +28,14 @@ class AddPlaceView extends StatelessWidget {
       body: BlocProvider(
         create: (_) => getIt<AddPlaceCubit>(),
         child: SafeArea(
-          child: AddPlaceViewBodyBlocConsumer(category: category),
+          child: AddPlaceViewBodyBlocConsumer(
+            category: category,
+            place: place,
+            isEditing: isEditing,
+            onUpdate: onUpdate,
+          ),
         ),
       ),
     );
   }
 }
-

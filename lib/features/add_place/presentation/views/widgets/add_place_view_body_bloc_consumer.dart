@@ -4,24 +4,42 @@ import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cu
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_state.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/widgets/add_place_view_body.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
+import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddPlaceViewBodyBlocConsumer extends StatelessWidget {
-  const AddPlaceViewBodyBlocConsumer({super.key, required this.category});
+  const AddPlaceViewBodyBlocConsumer({
+    super.key,
+    required this.category,
+    this.place,
+    required this.isEditing,
+    this.onUpdate,
+  });
 
   final CategoryEntity category;
+  final PlaceEntity? place;
+  final bool isEditing;
+  final Future<void> Function(PlaceEntity place)? onUpdate;
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AddPlaceCubit, AddPlaceState>(
       listener: (context, state) {
         if (state is AddPlaceValidationFailure) {
-          buildBar(context, state.message, type: SnackBarType.warning);
+          buildBar(
+            context,
+            state.message,
+            type: SnackBarType.warning,
+          );
         }
 
         if (state is AddPlaceFailure) {
-          buildBar(context, state.message, type: SnackBarType.error);
+          buildBar(
+            context,
+            state.message,
+            type: SnackBarType.error,
+          );
         }
 
         if (state is AddPlaceSuccess) {
@@ -29,16 +47,24 @@ class AddPlaceViewBodyBlocConsumer extends StatelessWidget {
 
           buildBar(
             context,
-            'تم إرسال طلب إضافة المكان بنجاح، وسيتم مراجعته قريبًا',
+            isEditing
+                ? 'تم إرسال تعديلات المكان بنجاح، وسيتم مراجعته قريبًا'
+                : 'تم إرسال طلب إضافة المكان بنجاح، وسيتم مراجعته قريبًا',
             type: SnackBarType.success,
           );
+
           Navigator.of(context).pop();
         }
       },
       builder: (context, state) {
         return CustomProgressHud(
           isLoading: state is AddPlaceLoading,
-          child: AddPlaceViewBody(category: category),
+          child: AddPlaceViewBody(
+            category: category,
+            place: place,
+            isEditing: isEditing,
+            onUpdate: onUpdate,
+          ),
         );
       },
     );

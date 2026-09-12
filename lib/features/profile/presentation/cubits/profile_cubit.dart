@@ -12,7 +12,11 @@ class ProfileCubit extends Cubit<ProfileState> {
   final PlaceRepo placeRepo;
   final AuthRepo authRepo;
 
+  String? _uid;
+
   Future<void> getProfile({required String uid}) async {
+    _uid = uid;
+
     emit(const ProfileLoading());
 
     try {
@@ -33,7 +37,63 @@ class ProfileCubit extends Cubit<ProfileState> {
         },
       );
     } catch (e) {
-      emit(ProfileFailure(message: 'حدث خطأ أثناء تحميل بيانات الملف الشخصي.'));
+      emit(
+        const ProfileFailure(
+          message: 'حدث خطأ أثناء تحميل بيانات الملف الشخصي.',
+        ),
+      );
     }
+  }
+
+  Future<void> updateProfile({required UserEntity user}) async {
+    final currentState = state;
+
+    if (currentState is! ProfileSuccess) {
+      return;
+    }
+
+    emit(const ProfileUpdating());
+
+    try {
+      await authRepo.updateUserData(user: user);
+
+      emit(ProfileSuccess(user: user, places: currentState.places));
+    } catch (e) {
+      emit(
+        const ProfileFailure(
+          message: 'حدث خطأ أثناء تحديث بيانات الملف الشخصي.',
+        ),
+      );
+    }
+  }
+
+  Future<void> updatePlace({required PlaceEntity place}) async {
+    final result = await placeRepo.updatePlace(place: place);
+
+    return result.fold(
+      (failure) {
+        throw Exception(failure.message);
+      },
+      (_) async {
+        if (_uid != null) {
+          await getProfile(uid: _uid!);
+        }
+      },
+    );
+  }
+
+  Future<void> deletePlace({required String placeId}) async {
+    final result = await placeRepo.deletePlace(placeId: placeId);
+
+    result.fold(
+      (failure) {
+        emit(ProfileFailure(message: failure.message));
+      },
+      (_) {
+        if (_uid != null) {
+          getProfile(uid: _uid!);
+        }
+      },
+    );
   }
 }

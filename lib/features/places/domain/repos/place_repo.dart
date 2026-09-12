@@ -17,4 +17,12 @@ abstract class PlaceRepo {
   Future<Either<Failure, List<PlaceEntity>>> getAllPlaces();
 
   Future<Either<Failure, List<PlaceEntity>>> getMyPlaces();
+
+   Future<Either<Failure, void>> updatePlace({
+    required PlaceEntity place,
+  });
+
+  Future<Either<Failure, void>> deletePlace({
+  required String placeId,
+});
 }
