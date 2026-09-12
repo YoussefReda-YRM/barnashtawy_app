@@ -11,10 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class CustomPlaceListViewBlocBuilder extends StatelessWidget {
-  const CustomPlaceListViewBlocBuilder({
-    super.key,
-    required this.category,
-  });
+  const CustomPlaceListViewBlocBuilder({super.key, required this.category});
 
   final CategoryEntity category;
 
@@ -22,10 +19,6 @@ class CustomPlaceListViewBlocBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<PlaceCubit, PlaceState>(
       builder: (context, state) {
-        // ============================================================
-        // LOADING
-        // ============================================================
-
         if (state is PlaceLoading) {
           return Skeletonizer(
             enabled: true,
@@ -36,64 +29,34 @@ class CustomPlaceListViewBlocBuilder extends StatelessWidget {
           );
         }
 
-        // ============================================================
-        // FAILURE
-        // ============================================================
-
         if (state is PlaceFailure) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: CustomErrorWidget(
-                text: state.errorMessage,
-              ),
+              child: CustomErrorWidget(text: state.errorMessage),
             ),
           );
         }
 
-        // ============================================================
-        // SEARCHING
-        // ============================================================
-
         if (state is PlaceSearching) {
           final places = state.places;
 
-          // البحث تم، ولكن مفيش نتيجة
           if (places.isEmpty) {
-            return CustomEmptySearchWidget(
-              searchQuery: state.searchQuery,
-            );
+            return CustomEmptySearchWidget(searchQuery: state.searchQuery);
           }
 
-          // البحث لقى نتائج
-          return CustomPlaceListViewBuilder(
-            category: category,
-            places: places,
-          );
+          return CustomPlaceListViewBuilder(category: category, places: places);
         }
-
-        // ============================================================
-        // SUCCESS
-        // ============================================================
 
         if (state is PlaceSuccess) {
           final places = state.places;
 
-          // مفيش بيانات اتضافت أصلًا
           if (places.isEmpty) {
             return const CustomEmptyPlacesWidget();
           }
 
-          // فيه بيانات
-          return CustomPlaceListViewBuilder(
-            category: category,
-            places: places,
-          );
+          return CustomPlaceListViewBuilder(category: category, places: places);
         }
-
-        // ============================================================
-        // DEFAULT
-        // ============================================================
 
         return const SizedBox.shrink();
       },

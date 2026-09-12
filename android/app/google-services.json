@@ -12,7 +12,20 @@
           "package_name": "com.example.barnasht_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "424970657652-01cb3f2iocd9gta849cstca8hm4e29p8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.barnasht_app",
+            "certificate_hash": "318ac3f1c94fef2504d2d4c01b5d375bc82bf715"
+          }
+        },
+        {
+          "client_id": "424970657652-9bekhl48e3rc2r17jeqh0jp3nuchav73.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC57rYug1Jf3zuwbieg6pb9OGN-hn3Bkv8"
@@ -20,7 +33,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "424970657652-9bekhl48e3rc2r17jeqh0jp3nuchav73.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "424970657652-kudmcsou9fp3938rer5i75v2b5nend5j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.barnashtApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:424970657652:android:77a2528ff6f4b76b6bd621",
+        "android_client_info": {
+          "package_name": "com.example.barnashtawy_dashboard_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "424970657652-9bekhl48e3rc2r17jeqh0jp3nuchav73.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC57rYug1Jf3zuwbieg6pb9OGN-hn3Bkv8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "424970657652-9bekhl48e3rc2r17jeqh0jp3nuchav73.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "424970657652-kudmcsou9fp3938rer5i75v2b5nend5j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.barnashtApp"
+              }
+            }
+          ]
         }
       }
     }

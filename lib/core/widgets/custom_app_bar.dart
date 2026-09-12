@@ -1,35 +1,47 @@
-import 'package:barnasht_app/core/widgets/notification_widget.dart';
+import 'package:barnasht_app/core/utils/app_colors.dart';
+import 'package:barnasht_app/core/widgets/custom_header_icon_widget.dart';
+import 'package:barnasht_app/core/widgets/custom_logo_widget.dart';
 import 'package:flutter/material.dart';
 
 import '../utils/app_text_styles.dart';
 
-AppBar buildAppBar(
+Widget customAppBar(
   BuildContext context, {
   required String title,
   bool showBackButton = true,
-  bool showNotification = true,
 }) {
-  return AppBar(
-    backgroundColor: Colors.white,
-    actions: [
-      Visibility(
-        visible: showNotification,
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: NotificationWidget(),
+  final colorScheme = Theme.of(context).colorScheme;
+  return Padding(
+    padding: const EdgeInsets.only(left: 16),
+    child: Row(
+      children: [
+        // Logo
+        const CustomLogoWidget(),
+
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyles.bold16.copyWith(color: colorScheme.onSurface),
+          ),
         ),
-      ),
-    ],
-    leading: Visibility(
-      visible: showBackButton,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.pop(context);
-        },
-        child: const Icon(Icons.arrow_back_ios_new),
-      ),
+
+        Visibility(
+          visible: showBackButton,
+          child: CustomHeaderIconWidget(
+            widget: Icon(
+              Icons.arrow_forward_ios_outlined,
+              size: 22,
+              color: AppColors.primary,
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ],
     ),
-    centerTitle: true,
-    title: Text(title, textAlign: TextAlign.center, style: TextStyles.bold19),
   );
 }

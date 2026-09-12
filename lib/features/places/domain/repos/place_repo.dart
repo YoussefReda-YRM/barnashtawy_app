@@ -15,4 +15,6 @@ abstract class PlaceRepo {
   });
 
   Future<Either<Failure, List<PlaceEntity>>> getAllPlaces();
+
+  Future<Either<Failure, List<PlaceEntity>>> getMyPlaces();
 }

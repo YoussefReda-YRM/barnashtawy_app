@@ -30,8 +30,7 @@ class PlaceCard extends StatelessWidget {
     final favoriteColor = colorScheme.error;
 
     final hasPhoneNumber =
-        place.phoneNumber != null &&
-        place.phoneNumber!.trim().isNotEmpty;
+        place.phoneNumber != null && place.phoneNumber!.trim().isNotEmpty;
 
     return Material(
       color: Colors.transparent,
@@ -72,10 +71,7 @@ class PlaceCard extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(6.0),
                         child: placeImage.trim().isNotEmpty
-                            ? SvgPicture.asset(
-                                placeImage,
-                                fit: BoxFit.contain,
-                              )
+                            ? SvgPicture.asset(placeImage, fit: BoxFit.contain)
                             : Icon(
                                 Icons.place_outlined,
                                 size: 28,

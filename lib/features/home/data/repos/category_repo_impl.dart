@@ -1,5 +1,5 @@
-import 'package:barnasht_app/core/constatnts.dart';
 import 'package:barnasht_app/core/services/database_service.dart';
+import 'package:barnasht_app/core/utils/back_end_point.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:dartz/dartz.dart';
 import 'package:barnasht_app/core/errors/failures.dart';
@@ -15,7 +15,7 @@ class CategoryRepoImpl extends CategoryRepo {
   Future<Either<Failure, List<CategoryEntity>>> getCategories() async {
     try {
       final data = await databaseService.getData(
-        path: categoriesPath,
+        path: BackendEndpoint.categoriesPath,
       ) as List<Map<String, dynamic>>;
 
       final List<CategoryEntity> categories = data

@@ -1,6 +1,4 @@
-import 'package:barnasht_app/core/utils/app_text_styles.dart';
-import 'package:barnasht_app/core/widgets/custom_header_icon_widget.dart';
-import 'package:barnasht_app/core/widgets/custom_logo_widget.dart';
+import 'package:barnasht_app/core/widgets/custom_app_bar.dart';
 import 'package:barnasht_app/features/favorite_places/presentation/views/widgets/favorite_place_view_body.dart';
 import 'package:flutter/material.dart';
 
@@ -20,50 +18,8 @@ class FavoritesView extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              // ==========================================================
-              // CUSTOM APP BAR
-              // ==========================================================
+              customAppBar(context, title: 'المفضلة'),
 
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 8,
-                  bottom: 8,
-                ),
-                child: Row(
-                  children: [
-                    const CustomLogoWidget(),
-
-                    Expanded(
-                      child: Text(
-                        'المفضلة',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: TextStyles.bold16.copyWith(
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-
-                    CustomHeaderIconWidget(
-                      widget: Icon(
-                        Icons.arrow_forward_ios_outlined,
-                        size: 22,
-                        color: colorScheme.primary,
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              // ==========================================================
-              // BODY
-              // ==========================================================
               const Expanded(child: FavoritePlaceViewBody()),
             ],
           ),

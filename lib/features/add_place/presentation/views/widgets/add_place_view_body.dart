@@ -1,7 +1,7 @@
 import 'package:barnasht_app/core/widgets/build_bar.dart';
+import 'package:barnasht_app/core/widgets/custom_app_bar.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cubit.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_state.dart';
-import 'package:barnasht_app/features/add_place/presentation/views/widgets/custom_app_bar_add_place_widget.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/widgets/custom_location_card_widget.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/widgets/custom_text_form_field_and_label.dart';
 import 'package:barnasht_app/core/widgets/custom_button_widget.dart';
@@ -95,7 +95,7 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
         // APP BAR
         // ========================================================
 
-        CustomAppBarAddPlaceWidget(),
+        customAppBar(context, title: 'اضافة مكان جديد', showBackButton: true),
 
         Expanded(
           child: Form(
@@ -154,33 +154,6 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
                   const SizedBox(height: 14),
 
                   // ==================================================
-                  // PHONE
-                  // ==================================================
-                  CustomTextFormFieldAndLabel(
-                    label: 'رقم الموبايل (اختياري)',
-                    hint: 'اكتب رقم موبايل المكان',
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    isRequired: false,
-                    validator: (value) {
-                      final phone = value?.trim() ?? '';
-
-                      // الرقم اختياري
-                      if (phone.isEmpty) {
-                        return null;
-                      }
-
-                      if (!RegExp(r'^01[0125][0-9]{8}$').hasMatch(phone)) {
-                        return 'من فضلك اكتب رقم موبايل مصري صحيح';
-                      }
-
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ==================================================
                   // DESCRIPTION
                   // ==================================================
                   CustomTextFormFieldAndLabel(
@@ -214,6 +187,33 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'من فضلك اكتب عنوان المكان';
+                      }
+
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ==================================================
+                  // PHONE
+                  // ==================================================
+                  CustomTextFormFieldAndLabel(
+                    label: 'رقم الموبايل (اختياري)',
+                    hint: 'اكتب رقم موبايل المكان',
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    isRequired: false,
+                    validator: (value) {
+                      final phone = value?.trim() ?? '';
+
+                      // الرقم اختياري
+                      if (phone.isEmpty) {
+                        return null;
+                      }
+
+                      if (!RegExp(r'^01[0125][0-9]{8}$').hasMatch(phone)) {
+                        return 'من فضلك اكتب رقم موبايل مصري صحيح';
                       }
 
                       return null;

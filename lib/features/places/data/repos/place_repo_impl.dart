@@ -1,6 +1,7 @@
-import 'package:barnasht_app/core/constatnts.dart';
 import 'package:barnasht_app/core/errors/failures.dart';
 import 'package:barnasht_app/core/services/database_service.dart';
+import 'package:barnasht_app/core/services/firebase_auth_service.dart';
+import 'package:barnasht_app/core/utils/back_end_point.dart';
 import 'package:barnasht_app/features/places/data/models/place_model.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:barnasht_app/features/places/domain/repos/place_repo.dart';
@@ -8,8 +9,9 @@ import 'package:dartz/dartz.dart';
 
 class PlaceRepoImpl extends PlaceRepo {
   final DatabaseService databaseService;
+  final FirebaseAuthService firebaseAuthService;
 
-  PlaceRepoImpl(this.databaseService);
+  PlaceRepoImpl(this.databaseService, this.firebaseAuthService);
 
   // ============================================================
   // CACHE
@@ -76,7 +78,7 @@ class PlaceRepoImpl extends PlaceRepo {
   }) async {
     try {
       final data = await databaseService.getData(
-        path: placesPath,
+        path: BackendEndpoint.placesPath,
         queries: [
           {'whereField': 'categoryId', 'whereValue': categoryId},
           {'whereField': 'status', 'whereValue': PlaceStatus.approved.name},
@@ -129,7 +131,9 @@ class PlaceRepoImpl extends PlaceRepo {
 
       final filteredPlaces = places.where((place) {
         final placeName = _normalizeArabic(place.placeName);
+
         final placeAddress = _normalizeArabic(place.placeAddress);
+
         final placeDescription = _normalizeArabic(place.placeDescription);
 
         return placeName.contains(query) ||
@@ -148,9 +152,24 @@ class PlaceRepoImpl extends PlaceRepo {
   @override
   Future<Either<Failure, void>> addPlace({required PlaceEntity place}) async {
     try {
-      final placeModel = PlaceModel(
+      // ----------------------------------------------------------
+      // Get Current User
+      // ----------------------------------------------------------
+
+      final currentUser = firebaseAuthService.currentUser;
+
+      if (currentUser == null) {
+        return left(ServerFailure('يجب تسجيل الدخول أولاً لإضافة مكان.'));
+      }
+
+      // ----------------------------------------------------------
+      // Create Place Entity with User ID
+      // ----------------------------------------------------------
+
+      final placeEntity = PlaceEntity(
         id: '',
         categoryId: place.categoryId,
+        userId: currentUser.uid,
         placeName: place.placeName,
         placeAddress: place.placeAddress,
         placeDescription: place.placeDescription,
@@ -159,10 +178,24 @@ class PlaceRepoImpl extends PlaceRepo {
         longitude: place.longitude,
         status: PlaceStatus.pending,
         createdAt: place.createdAt,
+        updatedAt: null,
+        reviewedAt: null,
+        reviewedBy: null,
+        rejectionReason: null,
       );
 
+      // ----------------------------------------------------------
+      // Convert Entity -> Model
+      // ----------------------------------------------------------
+
+      final placeModel = PlaceModel.fromEntity(placeEntity);
+
+      // ----------------------------------------------------------
+      // Save to Firestore
+      // ----------------------------------------------------------
+
       await databaseService.addData(
-        path: placesPath,
+        path: BackendEndpoint.placesPath,
         data: placeModel.toJson(),
       );
 
@@ -186,7 +219,7 @@ class PlaceRepoImpl extends PlaceRepo {
   Future<Either<Failure, List<PlaceEntity>>> getAllPlaces() async {
     try {
       final data = await databaseService.getData(
-        path: placesPath,
+        path: BackendEndpoint.placesPath,
         queries: [
           {'whereField': 'status', 'whereValue': PlaceStatus.approved.name},
         ],
@@ -238,5 +271,47 @@ class PlaceRepoImpl extends PlaceRepo {
         .replaceAll('ى', 'ي')
         .replaceAll(RegExp(r'[\u064B-\u065F\u0670]'), '')
         .replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  // ============================================================
+  // GET MY PLACES
+  // ============================================================
+
+  @override
+  Future<Either<Failure, List<PlaceEntity>>> getMyPlaces() async {
+    try {
+      // ----------------------------------------------------------
+      // Get Current User
+      // ----------------------------------------------------------
+
+      final currentUser = firebaseAuthService.currentUser;
+
+      if (currentUser == null) {
+        return left(ServerFailure('يجب تسجيل الدخول أولاً.'));
+      }
+
+      // ----------------------------------------------------------
+      // Get User Places
+      // ----------------------------------------------------------
+
+      final data = await databaseService.getData(
+        path: BackendEndpoint.placesPath,
+        queries: [
+          {'whereField': 'userId', 'whereValue': currentUser.uid},
+        ],
+      ) as List<Map<String, dynamic>>;
+
+      // ----------------------------------------------------------
+      // Convert JSON -> Entity
+      // ----------------------------------------------------------
+
+      final places = data
+          .map((json) => PlaceModel.fromJson(json).toEntity())
+          .toList();
+
+      return right(places);
+    } catch (e) {
+      return left(ServerFailure('Failed to get my places: $e'));
+    }
   }
 }

@@ -1,114 +1,137 @@
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:math' as math;
 
+import 'package:barnasht_app/core/errors/exceptions.dart';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthService {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
-  /// إرسال كود OTP إلى رقم الهاتف
-  Future<void> sendOtp({
-    required String phoneNumber,
-    required void Function(String verificationId) onCodeSent,
+  Future<User> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
   }) async {
     try {
-      await _firebaseAuth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-
-        // Android
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          try {
-            await _firebaseAuth.signInWithCredential(credential);
-          } catch (e) {
-            log(
-              'Exception in FirebaseAuthService.verificationCompleted: $e',
-            );
-          }
-        },
-
-        verificationFailed: (FirebaseAuthException e) {
-          log(
-            'Exception in FirebaseAuthService.verificationFailed: '
-            '${e.toString()} | code: ${e.code}',
-          );
-
-          throw e;
-        },
-
-        // إرسال الـ OTP بنجاح
-        codeSent: (String verificationId, int? resendToken) {
-          onCodeSent(verificationId);
-        },
-
-        codeAutoRetrievalTimeout: (String verificationId) {
-          log(
-            'FirebaseAuthService.codeAutoRetrievalTimeout: $verificationId',
-          );
-        },
-      );
-    } catch (e) {
-      log(
-        'Exception in FirebaseAuthService.sendOtp: ${e.toString()}',
-      );
-
-      rethrow;
-    }
-  }
-
-  /// التحقق من كود OTP وتسجيل الدخول
-  Future<UserCredential> verifyOtp({
-    required String verificationId,
-    required String smsCode,
-  }) async {
-    try {
-      final PhoneAuthCredential credential =
-          PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: smsCode,
-      );
-
-      return await _firebaseAuth.signInWithCredential(credential);
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      return credential.user!;
     } on FirebaseAuthException catch (e) {
       log(
-        'Exception in FirebaseAuthService.verifyOtp: '
-        '${e.toString()} | code: ${e.code}',
+        "Exception in FirebaseAuthService.createUserWithEmailAndPassword: ${e.toString()} and code is ${e.code}",
       );
-
-      rethrow;
+      if (e.code == 'weak-password') {
+        throw CustomException(message: 'الرقم السري ضعيف جداً.');
+      } else if (e.code == 'email-already-in-use') {
+        throw CustomException(
+          message: 'لقد قمت بالتسجيل مسبقاً. الرجاء تسجيل الدخول.',
+        );
+      } else if (e.code == 'network-request-failed') {
+        throw CustomException(message: 'تاكد من اتصالك بالانترنت.');
+      } else {
+        throw CustomException(
+          message: 'لقد حدث خطأ ما. الرجاء المحاولة مرة اخرى.',
+        );
+      }
     } catch (e) {
       log(
-        'Exception in FirebaseAuthService.verifyOtp: ${e.toString()}',
+        "Exception in FirebaseAuthService.createUserWithEmailAndPassword: ${e.toString()}",
       );
 
-      rethrow;
+      throw CustomException(
+        message: 'لقد حدث خطأ ما. الرجاء المحاولة مرة اخرى.',
+      );
     }
   }
 
-  /// إعادة إرسال OTP
-  Future<void> resendOtp({
-    required String phoneNumber,
-    required void Function(String verificationId) onCodeSent,
+  Future<User> signInWithEmailAndPassword({
+    required String email,
+    required String password,
   }) async {
-    await sendOtp(
-      phoneNumber: phoneNumber,
-      onCodeSent: onCodeSent,
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return credential.user!;
+    } on FirebaseAuthException catch (e) {
+      log(
+        "Exception in FirebaseAuthService.signInWithEmailAndPassword: ${e.toString()} and code is ${e.code}",
+      );
+      if (e.code == 'user-not-found') {
+        throw CustomException(
+          message: 'الرقم السري او البريد الالكتروني غير صحيح.',
+        );
+      } else if (e.code == 'wrong-password') {
+        throw CustomException(
+          message: 'الرقم السري او البريد الالكتروني غير صحيح.',
+        );
+      } else if (e.code == 'invalid-credential') {
+        throw CustomException(
+          message: 'الرقم السري او البريد الالكتروني غير صحيح.',
+        );
+      } else if (e.code == 'network-request-failed') {
+        throw CustomException(message: 'تاكد من اتصالك بالانترنت.');
+      } else {
+        throw CustomException(
+          message: 'لقد حدث خطأ ما. الرجاء المحاولة مرة اخرى.',
+        );
+      }
+    } catch (e) {
+      log(
+        "Exception in FirebaseAuthService.signInWithEmailAndPassword: ${e.toString()}",
+      );
+
+      throw CustomException(
+        message: 'لقد حدث خطأ ما. الرجاء المحاولة مرة اخرى.',
+      );
+    }
+  }
+
+  Future<User> signInWithGoogle() async {
+    final googleUser = await GoogleSignIn.instance.authenticate();
+
+    final googleAuth = googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
     );
+
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(
+      credential,
+    );
+
+    return userCredential.user!;
   }
 
-  /// المستخدم الحالي
-  User? get currentUser => _firebaseAuth.currentUser;
+  String generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = math.Random.secure();
+    return List.generate(
+      length,
+      (_) => charset[random.nextInt(charset.length)],
+    ).join();
+  }
 
-  /// هل المستخدم مسجل دخول؟
+  String sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  User? get currentUser => FirebaseAuth.instance.currentUser;
+
   bool isLoggedIn() {
-    return _firebaseAuth.currentUser != null;
+    final user = FirebaseAuth.instance.currentUser;
+    return user != null;
   }
 
-  /// تسجيل الخروج
   Future<void> signOut() async {
-    await _firebaseAuth.signOut();
+    await FirebaseAuth.instance.signOut();
   }
 
-  /// حذف الحساب
-  Future<void> deleteUser() async {
-    await _firebaseAuth.currentUser?.delete();
+  Future deleteUser() async {
+    await FirebaseAuth.instance.currentUser!.delete();
   }
 }

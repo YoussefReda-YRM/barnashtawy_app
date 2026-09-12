@@ -13,7 +13,7 @@ class AddPlaceCubit extends Cubit<AddPlaceState> {
     required String placeName,
     required String placeAddress,
     required String placeDescription,
-    String? phoneNumber, // ✅ جديد
+    String? phoneNumber,
     required double latitude,
     required double longitude,
   }) async {
@@ -24,7 +24,7 @@ class AddPlaceCubit extends Cubit<AddPlaceState> {
     final name = placeName.trim();
     final address = placeAddress.trim();
     final description = placeDescription.trim();
-    final phone = phoneNumber?.trim(); // ✅
+    final phone = phoneNumber?.trim();
 
     // ============================================================
     // VALIDATION
@@ -70,17 +70,23 @@ class AddPlaceCubit extends Cubit<AddPlaceState> {
       final place = PlaceEntity(
         id: '',
         categoryId: category,
+
+        // يتم تحديد userId داخل PlaceRepoImpl
+        // من FirebaseAuth.currentUser.uid
+        userId: '',
+
         placeName: name,
         placeAddress: address,
         placeDescription: description,
-
-        // ✅ رقم الموبايل
         phoneNumber: phone?.isEmpty == true ? null : phone,
-
         latitude: latitude,
         longitude: longitude,
         status: PlaceStatus.pending,
         createdAt: DateTime.now(),
+        updatedAt: null,
+        reviewedAt: null,
+        reviewedBy: null,
+        rejectionReason: null,
       );
 
       // ============================================================

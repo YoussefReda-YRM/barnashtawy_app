@@ -1,15 +1,15 @@
+import 'package:barnasht_app/core/services/firebase_auth_service.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/core/widgets/custom_header_icon_widget.dart';
 import 'package:barnasht_app/core/widgets/custom_logo_widget.dart';
+import 'package:barnasht_app/core/widgets/show_custom_app_dialog.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/add_place_view.dart';
+import 'package:barnasht_app/features/auth/presentation/views/signin_view.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:flutter/material.dart';
 
 class AppBarPlaceViewWidget extends StatelessWidget {
-  const AppBarPlaceViewWidget({
-    super.key,
-    required this.category,
-  });
+  const AppBarPlaceViewWidget({super.key, required this.category});
 
   final CategoryEntity category;
 
@@ -29,9 +29,7 @@ class AppBarPlaceViewWidget extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: TextStyles.bold16.copyWith(
-              color: colorScheme.onSurface,
-            ),
+            style: TextStyles.bold16.copyWith(color: colorScheme.onSurface),
           ),
         ),
 
@@ -44,11 +42,31 @@ class AppBarPlaceViewWidget extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    AddPlaceView.routeName,
-                    arguments: category,
-                  );
+                  final isLoggedIn = FirebaseAuthService().isLoggedIn();
+
+                  if (isLoggedIn) {
+                    Navigator.pushNamed(
+                      context,
+                      AddPlaceView.routeName,
+                      arguments: category,
+                    );
+                  } else {
+                    showCustomAppDialog(
+                      context: context,
+                      title: 'تسجيل الدخول مطلوب',
+                      message: 'لإضافة مكان جديد والمساهمة في خدمة أهل برنشت، يجب عليك تسجيل الدخول أولاً.',
+                      icon: Icons.lock_outline_rounded,
+                      iconColor: colorScheme.primary,
+                      confirmButtonColor: colorScheme.primary,
+                      confirmText: 'تسجيل الدخول',
+                      onConfirm: () async {
+                        await Navigator.pushNamed(
+                          context,
+                          SigninView.routeName,
+                        );
+                      },
+                    );
+                  }
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(

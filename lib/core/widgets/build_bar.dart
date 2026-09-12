@@ -7,7 +7,7 @@ void buildBar(
   String message, {
   SnackBarType type = SnackBarType.info,
   String? title,
-  Duration duration = const Duration(seconds: 2),
+  Duration duration = const Duration(seconds: 3),
 }) {
   final config = _getSnackBarConfig(type);
 

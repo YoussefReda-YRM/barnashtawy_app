@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   cloud_firestore: ^6.9.0
+  crypto: ^3.0.7
   cupertino_icons: ^1.0.8
   dartz: ^0.10.1
   equatable: ^2.1.0
@@ -43,6 +44,7 @@ dependencies:
   geolocator: ^14.0.3
   get_it: ^9.2.1
   google_maps_flutter: ^2.18.0
+  google_sign_in: ^7.2.0
   intl: ^0.20.3
   modal_progress_hud_nsn: ^0.5.1
   shared_preferences: ^2.5.5
