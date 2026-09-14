@@ -56,7 +56,12 @@ class AppBarWidget extends StatelessWidget {
               icon: Icons.login,
               confirmText: "تسجيل الدخول",
               onConfirm: () async {
-                await Navigator.pushNamed(context, SigninView.routeName);
+                Navigator.pop(context);
+                await Navigator.pushNamed(
+                  context,
+                  SigninView.routeName,
+                  arguments: true,
+                );
               },
             );
           },

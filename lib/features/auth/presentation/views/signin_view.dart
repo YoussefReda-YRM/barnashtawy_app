@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SigninView extends StatelessWidget {
-  const SigninView({super.key});
+  const SigninView({super.key, this.isProfile = false});
+
+  final bool? isProfile;
 
   static const String routeName = 'login_view';
   @override
@@ -14,7 +16,9 @@ class SigninView extends StatelessWidget {
     return BlocProvider(
       create: (context) => SigninCubit(getIt.get<AuthRepo>()),
       child: Scaffold(
-        body: SafeArea(child: const SigninViewBodyBlocConsumer()),
+        body: SafeArea(
+          child: SigninViewBodyBlocConsumer(isProfile: isProfile!),
+        ),
       ),
     );
   }

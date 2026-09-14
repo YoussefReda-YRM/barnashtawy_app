@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
-
-
 class SignupViewBodyBlocConsumer extends StatelessWidget {
   const SignupViewBodyBlocConsumer({super.key});
 
@@ -16,6 +14,11 @@ class SignupViewBodyBlocConsumer extends StatelessWidget {
       listener: (context, state) {
         if (state is SignupSuccess) {
           Navigator.pop(context);
+          buildBar(
+            context,
+            'تم إنشاء الحساب بنجاح',
+            type: SnackBarType.success,
+          );
         }
         if (state is SignupFailure) {
           buildBar(context, state.message, type: SnackBarType.error);

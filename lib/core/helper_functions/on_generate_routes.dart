@@ -24,7 +24,9 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => const HomeView());
 
     case SigninView.routeName:
-      return MaterialPageRoute(builder: (context) => const SigninView());
+      return MaterialPageRoute(
+        builder: (context) => SigninView(isProfile: settings.arguments as bool),
+      );
     case SignupView.routeName:
       return MaterialPageRoute(builder: (context) => const SignupView());
 

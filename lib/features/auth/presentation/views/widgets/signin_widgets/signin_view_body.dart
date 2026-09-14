@@ -109,6 +109,7 @@ class _SigninViewBodyState extends State<SigninViewBody> {
                     image: Assets.imagesGoogleIcon,
                     title: 'تسجيل بواسطة جوجل',
                   ),
+                  SizedBox(height: 16),
                 ],
               ),
             ),

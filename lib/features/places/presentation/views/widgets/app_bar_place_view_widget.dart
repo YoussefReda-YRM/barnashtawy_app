@@ -60,9 +60,12 @@ class AppBarPlaceViewWidget extends StatelessWidget {
                       confirmButtonColor: colorScheme.primary,
                       confirmText: 'تسجيل الدخول',
                       onConfirm: () async {
+                        Navigator.pop(context);
+
                         await Navigator.pushNamed(
                           context,
                           SigninView.routeName,
+                          arguments: false,
                         );
                       },
                     );

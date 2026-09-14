@@ -1,5 +1,4 @@
 import 'package:barnasht_app/core/utils/app_images.dart';
-import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:barnasht_app/core/widgets/custom_app_bar.dart';
 import 'package:barnasht_app/core/widgets/custom_button_widget.dart';
 import 'package:barnasht_app/core/widgets/custom_text_form_field.dart';
@@ -26,8 +25,6 @@ class _SignupViewBodyState extends State<SignupViewBody> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  bool isTermsAccepted = false;
-
   @override
   void dispose() {
     nameController.dispose();
@@ -39,15 +36,6 @@ class _SignupViewBodyState extends State<SignupViewBody> {
 
   void signup() {
     if (formKey.currentState!.validate()) {
-      if (!isTermsAccepted) {
-        buildBar(
-          context,
-          'يجب عليك الموافقة على الشروط والأحكام',
-          type: SnackBarType.warning,
-        );
-        return;
-      }
-
       context.read<SignupCubit>().createUserWithEmailAndPassword(
         emailController.text.trim(),
         passwordController.text,
@@ -146,14 +134,6 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                   // Password
                   PasswordField(controller: passwordController),
 
-                  // // Terms and Conditions
-                  // TermsAndConditionsWidget(
-                  //   onChanged: (value) {
-                  //     setState(() {
-                  //       isTermsAccepted = value;
-                  //     });
-                  //   },
-                  // ),
                   const SizedBox(height: 33),
 
                   // Signup Button
@@ -162,6 +142,7 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                   const SizedBox(height: 33),
 
                   const HaveAnAccountWidget(),
+                  SizedBox(height: 16),
                 ],
               ),
             ),
