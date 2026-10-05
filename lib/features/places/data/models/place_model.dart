@@ -8,6 +8,7 @@ class PlaceModel {
 
   final String placeName;
   final String placeAddress;
+  final String? locationName;
   final String placeDescription;
   final String? phoneNumber;
 
@@ -29,6 +30,7 @@ class PlaceModel {
     required this.userId,
     required this.placeName,
     required this.placeAddress,
+    this.locationName,
     required this.placeDescription,
     required this.latitude,
     required this.longitude,
@@ -41,10 +43,6 @@ class PlaceModel {
     this.rejectionReason,
   });
 
-  // ============================================================
-  // FROM JSON
-  // ============================================================
-
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
       id: json['id'] ?? '',
@@ -52,6 +50,7 @@ class PlaceModel {
       userId: json['userId'] ?? '',
       placeName: json['placeName'] ?? '',
       placeAddress: json['placeAddress'] ?? '',
+      locationName: json['locationName'] as String?,
       placeDescription: json['placeDescription'] ?? '',
       phoneNumber: json['phoneNumber'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
@@ -65,10 +64,6 @@ class PlaceModel {
     );
   }
 
-  // ============================================================
-  // TO ENTITY
-  // ============================================================
-
   PlaceEntity toEntity() {
     return PlaceEntity(
       id: id,
@@ -76,6 +71,7 @@ class PlaceModel {
       userId: userId,
       placeName: placeName,
       placeAddress: placeAddress,
+      locationName: locationName,
       placeDescription: placeDescription,
       latitude: latitude,
       longitude: longitude,
@@ -89,10 +85,6 @@ class PlaceModel {
     );
   }
 
-  // ============================================================
-  // FROM ENTITY
-  // ============================================================
-
   factory PlaceModel.fromEntity(PlaceEntity entity) {
     return PlaceModel(
       id: entity.id,
@@ -100,6 +92,7 @@ class PlaceModel {
       userId: entity.userId,
       placeName: entity.placeName,
       placeAddress: entity.placeAddress,
+      locationName: entity.locationName,
       placeDescription: entity.placeDescription,
       phoneNumber: entity.phoneNumber,
       latitude: entity.latitude,
@@ -113,10 +106,6 @@ class PlaceModel {
     );
   }
 
-  // ============================================================
-  // TO JSON
-  // ============================================================
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -124,6 +113,7 @@ class PlaceModel {
       'userId': userId,
       'placeName': placeName,
       'placeAddress': placeAddress,
+      'locationName': locationName,
       'placeDescription': placeDescription,
       'phoneNumber': phoneNumber,
       'latitude': latitude,
@@ -137,28 +127,19 @@ class PlaceModel {
     };
   }
 
-  // ============================================================
-  // FIRESTORE
-  // ============================================================
-
   Map<String, dynamic> toFirestore() {
     return {
       'categoryId': categoryId,
       'userId': userId,
       'placeName': placeName,
       'placeAddress': placeAddress,
+      'locationName': locationName,
       'placeDescription': placeDescription,
       'phoneNumber': phoneNumber,
       'latitude': latitude,
       'longitude': longitude,
-
-      // أي مكان جديد يبدأ Pending
       'status': PlaceStatus.pending.name,
-
-      // وقت إنشاء المكان من سيرفر Firestore
       'createdAt': FieldValue.serverTimestamp(),
-
-      // لم تتم مراجعته بعد
       'updatedAt': null,
       'reviewedAt': null,
       'reviewedBy': null,
@@ -166,27 +147,17 @@ class PlaceModel {
     };
   }
 
-  // ============================================================
-  // STATUS
-  // ============================================================
-
   static PlaceStatus _statusFromString(dynamic value) {
     switch (value) {
       case 'approved':
         return PlaceStatus.approved;
-
       case 'rejected':
         return PlaceStatus.rejected;
-
       case 'pending':
       default:
         return PlaceStatus.pending;
     }
   }
-
-  // ============================================================
-  // DATE TIME
-  // ============================================================
 
   static DateTime _dateTimeFromJson(dynamic value) {
     if (value is Timestamp) {

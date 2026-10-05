@@ -2,7 +2,6 @@ import 'package:barnasht_app/core/utils/app_images.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:flutter/material.dart';
-import 'package:svg_flutter/svg.dart';
 
 class HomeCategoryCard extends StatelessWidget {
   const HomeCategoryCard({super.key, required this.category, this.onTap});
@@ -46,22 +45,26 @@ class HomeCategoryCard extends StatelessWidget {
             child: Column(
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: category.image.isEmpty
-                          ? Image.asset(
-                              Assets.imagesAppLogoTransparent,
-                              width: double.infinity,
-                              fit: BoxFit.contain,
-                            )
-                          : SvgPicture.asset(
-                              category.image,
-                              width: double.infinity,
-                              fit: BoxFit.contain,
-                            ),
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final imageSize = constraints.maxWidth * 0.55;
+
+                      return Center(
+                        child: SizedBox(
+                          width: imageSize,
+                          height: imageSize,
+                          child: category.image.isEmpty
+                              ? Image.asset(
+                                  Assets.imagesAppLogoTransparent,
+                                  fit: BoxFit.contain,
+                                )
+                              : Image.asset(
+                                  category.image,
+                                  fit: BoxFit.contain,
+                                ),
+                        ),
+                      );
+                    },
                   ),
                 ),
 

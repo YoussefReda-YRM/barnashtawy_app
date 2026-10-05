@@ -3,7 +3,7 @@ import 'package:barnasht_app/core/services/get_it_service.dart';
 import 'package:barnasht_app/core/services/shared_preferences_singleton.dart';
 import 'package:barnasht_app/core/theme/app_theme.dart';
 import 'package:barnasht_app/core/theme/theme_cubit.dart';
-import 'package:barnasht_app/features/home/presentation/views/home_view.dart';
+import 'package:barnasht_app/features/permissions/presentation/views/permission_onboarding_view.dart';
 import 'package:barnasht_app/features/places/presentation/cubits/favorite_place_cubit.dart';
 import 'package:barnasht_app/firebase_options.dart';
 import 'package:barnasht_app/generated/l10n.dart';
@@ -17,7 +17,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
 
   await GoogleSignIn.instance.initialize();
 
@@ -58,7 +57,7 @@ class BarnashtawyApp extends StatelessWidget {
 
             onGenerateRoute: onGenerateRoute,
 
-            initialRoute: HomeView.routeName,
+            initialRoute: PermissionOnboardingView.routeName,
 
             debugShowCheckedModeBanner: false,
           );

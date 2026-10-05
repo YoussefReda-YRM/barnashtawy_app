@@ -19,20 +19,16 @@ class ToContactUsWidget extends StatelessWidget {
       );
 
       if (!launched && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تعذر فتح صفحة فيسبوك'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('تعذر فتح صفحة فيسبوك')));
       }
     } catch (e) {
       debugPrint('Facebook Error: $e');
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('حدث خطأ أثناء فتح فيسبوك'),
-          ),
+          const SnackBar(content: Text('حدث خطأ أثناء فتح فيسبوك')),
         );
       }
     }
@@ -78,32 +74,27 @@ class ToContactUsWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(30),
             onTap: () => _openFacebook(context),
             child: Container(
-              height: 22,
-              width: 130,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
-                color: facebookColor.withValues(alpha: 0.15),
+                color: facebookColor.withValues(alpha: 0.12),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  children: [
-                    SvgPicture.asset(
-                      Assets.imagesFacebookIcon,
-                      width: 14,
-                      height: 14,
-                    ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset(
+                    Assets.imagesFacebookIcon,
+                    width: 16,
+                    height: 16,
+                  ),
 
-                    const Spacer(),
+                  const SizedBox(width: 7),
 
-                    Text(
-                      'تابعنا على فيسبوك',
-                      style: TextStyles.semiBold11.copyWith(
-                        color: facebookColor,
-                      ),
-                    ),
-                  ],
-                ),
+                  Text(
+                    'تابعنا على فيسبوك',
+                    style: TextStyles.semiBold11.copyWith(color: facebookColor),
+                  ),
+                ],
               ),
             ),
           ),

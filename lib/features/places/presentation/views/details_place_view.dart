@@ -7,7 +7,6 @@ import 'package:barnasht_app/core/helper_functions/open_location.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:barnasht_app/features/places/presentation/views/widgets/info_card_details_pace.dart';
 import 'package:flutter/material.dart';
-import 'package:svg_flutter/svg.dart';
 
 class DetailsPlaceView extends StatelessWidget {
   const DetailsPlaceView({
@@ -109,7 +108,7 @@ class DetailsPlaceView extends StatelessWidget {
                                 ),
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              child: SvgPicture.asset(placeImage),
+                              child: Image.asset(placeImage),
                             ),
 
                             const SizedBox(height: 8),
@@ -172,9 +171,10 @@ class DetailsPlaceView extends StatelessWidget {
 
                       InfoCard(
                         icon: Icons.my_location_rounded,
-                        title: 'الموقع',
-                        value:
-                            '${place.longitude.toString()}, ${place.latitude.toString()}',
+                        title: 'الموقع على الخريطة',
+                        value: place.locationName?.trim().isNotEmpty == true
+                            ? place.locationName!.trim()
+                            : place.placeAddress,
                       ),
 
                       const SizedBox(height: 20),

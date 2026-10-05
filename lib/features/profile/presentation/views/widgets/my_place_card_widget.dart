@@ -1,6 +1,7 @@
 import 'package:barnasht_app/core/helper_functions/mak_phone_call.dart';
 import 'package:barnasht_app/core/helper_functions/open_location.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
+import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:barnasht_app/features/profile/presentation/views/widgets/place_action_buston.dart';
 import 'package:barnasht_app/features/profile/presentation/views/widgets/status_badge_widget.dart';
@@ -10,6 +11,7 @@ class MyPlaceCard extends StatelessWidget {
   const MyPlaceCard({
     super.key,
     required this.place,
+    required this.category,
     required this.status,
     required this.statusColor,
     required this.onEdit,
@@ -17,6 +19,7 @@ class MyPlaceCard extends StatelessWidget {
   });
 
   final PlaceEntity place;
+  final CategoryEntity category;
   final String status;
   final Color statusColor;
   final VoidCallback onEdit;
@@ -25,6 +28,9 @@ class MyPlaceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    final categoryName = category.name;
+    final categoryImage = category.image;
 
     final hasPhoneNumber =
         place.phoneNumber != null && place.phoneNumber!.trim().isNotEmpty;
@@ -59,21 +65,39 @@ class MyPlaceCard extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.10),
+                      color: colorScheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Icon(
-                      Icons.storefront_outlined,
-                      color: colorScheme.primary,
-                      size: 27,
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: categoryImage.trim().isNotEmpty
+                          ? Image.asset(
+                              categoryImage,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, _, _) {
+                                return Icon(
+                                  Icons.category_outlined,
+                                  size: 28,
+                                  color: colorScheme.primary,
+                                );
+                              },
+                            )
+                          : Icon(
+                              Icons.category_outlined,
+                              size: 28,
+                              color: colorScheme.primary,
+                            ),
                     ),
                   ),
+
                   const SizedBox(width: 12),
+
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Text(
@@ -85,34 +109,35 @@ class MyPlaceCard extends StatelessWidget {
                                 ),
                               ),
                             ),
+
                             const SizedBox(width: 8),
+
                             StatusBadge(status: status, color: statusColor),
                           ],
                         ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.category_outlined,
-                              size: 14,
-                              color: colorScheme.onSurface.withValues(
-                                alpha: 0.50,
+
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: colorScheme.primary.withValues(
+                                alpha: 0.15,
                               ),
                             ),
-                            const SizedBox(width: 5),
-                            Expanded(
-                              child: Text(
-                                place.categoryId,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyles.regular11.copyWith(
-                                  color: colorScheme.onSurface.withValues(
-                                    alpha: 0.55,
-                                  ),
-                                ),
-                              ),
+                          ),
+                          child: Text(
+                            categoryName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyles.regular11.copyWith(
+                              color: colorScheme.primary,
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
@@ -122,9 +147,6 @@ class MyPlaceCard extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // ========================================================
-              // ADDRESS
-              // ========================================================
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -141,7 +163,9 @@ class MyPlaceCard extends StatelessWidget {
                       size: 17,
                       color: colorScheme.primary,
                     ),
+
                     const SizedBox(width: 7),
+
                     Expanded(
                       child: Text(
                         place.placeAddress,
@@ -152,7 +176,9 @@ class MyPlaceCard extends StatelessWidget {
                         ),
                       ),
                     ),
+
                     const SizedBox(width: 8),
+
                     Material(
                       color: colorScheme.primary.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(9),
@@ -175,6 +201,7 @@ class MyPlaceCard extends StatelessWidget {
 
               if (hasPhoneNumber) ...[
                 const SizedBox(height: 10),
+
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -191,7 +218,9 @@ class MyPlaceCard extends StatelessWidget {
                         size: 17,
                         color: colorScheme.primary,
                       ),
+
                       const SizedBox(width: 7),
+
                       Expanded(
                         child: Text(
                           place.phoneNumber!,
@@ -202,7 +231,9 @@ class MyPlaceCard extends StatelessWidget {
                           ),
                         ),
                       ),
+
                       const SizedBox(width: 8),
+
                       Material(
                         color: colorScheme.primary.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(9),
@@ -227,9 +258,9 @@ class MyPlaceCard extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // ========================================================
+              // ============================================================
               // ACTIONS
-              // ========================================================
+              // ============================================================
               Row(
                 children: [
                   Expanded(
@@ -240,7 +271,9 @@ class MyPlaceCard extends StatelessWidget {
                       onTap: onEdit,
                     ),
                   ),
+
                   const SizedBox(width: 8),
+
                   Expanded(
                     child: PlaceActionButton(
                       icon: Icons.delete_outline_rounded,

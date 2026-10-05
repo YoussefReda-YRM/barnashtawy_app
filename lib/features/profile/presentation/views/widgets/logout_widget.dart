@@ -1,13 +1,19 @@
 import 'package:barnasht_app/core/services/firebase_auth_service.dart';
+import 'package:barnasht_app/core/services/get_it_service.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:barnasht_app/core/widgets/show_custom_app_dialog.dart';
 import 'package:flutter/material.dart';
 
 class LogoutWidget extends StatelessWidget {
-  const LogoutWidget({super.key, required this.colorScheme});
+  const LogoutWidget({
+    super.key,
+    required this.colorScheme,
+    required this.onLoggedOut,
+  });
 
   final ColorScheme colorScheme;
+  final VoidCallback onLoggedOut;
 
   @override
   Widget build(BuildContext context) {
@@ -25,18 +31,19 @@ class LogoutWidget extends StatelessWidget {
             confirmButtonColor: colorScheme.error,
             confirmText: 'تسجيل الخروج',
             onConfirm: () async {
-              await FirebaseAuthService().signOut();
-              if (context.mounted) {
-                Navigator.pop(context);
-              }
+              await getIt<FirebaseAuthService>().signOut();
 
-              if (context.mounted) {
-                buildBar(
-                  context,
-                  'تم تسجيل الخروج بنجاح',
-                  type: SnackBarType.success,
-                );
-              }
+              if (!context.mounted) return;
+
+              onLoggedOut();
+
+              if (!context.mounted) return;
+
+              buildBar(
+                context,
+                'تم تسجيل الخروج بنجاح',
+                type: SnackBarType.success,
+              );
             },
           );
         },

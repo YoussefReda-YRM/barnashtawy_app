@@ -11,20 +11,27 @@ final class PlaceLoading extends PlaceState {}
 final class PlaceSuccess extends PlaceState {
   final List<PlaceEntity> places;
 
-  PlaceSuccess({required this.places});
+  PlaceSuccess({
+    required this.places,
+  });
 }
 
 final class PlaceFailure extends PlaceState {
   final String errorMessage;
 
-  PlaceFailure({required this.errorMessage});
+  PlaceFailure({
+    required this.errorMessage,
+  });
 }
 
 final class PlaceSearching extends PlaceState {
   final List<PlaceEntity> places;
   final String searchQuery;
 
-  PlaceSearching({required this.places, required this.searchQuery});
+  PlaceSearching({
+    required this.places,
+    required this.searchQuery,
+  });
 }
 
 final class PlaceAdding extends PlaceState {}
@@ -34,5 +41,7 @@ final class PlaceAdded extends PlaceState {}
 final class PlaceAddFailure extends PlaceState {
   final String errorMessage;
 
-  PlaceAddFailure({required this.errorMessage});
+  PlaceAddFailure({
+    required this.errorMessage,
+  });
 }

@@ -173,6 +173,7 @@ class PlaceRepoImpl extends PlaceRepo {
         userId: currentUser.uid,
         placeName: place.placeName,
         placeAddress: place.placeAddress,
+        locationName: place.locationName,
         placeDescription: place.placeDescription,
         phoneNumber: place.phoneNumber,
         latitude: place.latitude,
@@ -184,7 +185,6 @@ class PlaceRepoImpl extends PlaceRepo {
         reviewedBy: null,
         rejectionReason: null,
       );
-
       // ----------------------------------------------------------
       // Convert Entity -> Model
       // ----------------------------------------------------------
@@ -339,17 +339,16 @@ class PlaceRepoImpl extends PlaceRepo {
           'userId': currentUser.uid,
           'placeName': place.placeName,
           'placeAddress': place.placeAddress,
+          'locationName': place.locationName,
           'placeDescription': place.placeDescription,
           'phoneNumber': place.phoneNumber,
           'latitude': place.latitude,
           'longitude': place.longitude,
 
-          // أي تعديل يرجع المكان للمراجعة.
           'status': PlaceStatus.pending.name,
 
           'updatedAt': FieldValue.serverTimestamp(),
 
-          // إعادة ضبط بيانات المراجعة القديمة.
           'reviewedAt': null,
           'reviewedBy': null,
           'rejectionReason': null,

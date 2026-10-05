@@ -30,6 +30,9 @@ Widget customAppBar(
 
         Visibility(
           visible: showBackButton,
+          maintainSize: true,
+          maintainAnimation: true,
+          maintainState: true,
           child: CustomHeaderIconWidget(
             widget: Icon(
               Icons.arrow_forward_ios_outlined,

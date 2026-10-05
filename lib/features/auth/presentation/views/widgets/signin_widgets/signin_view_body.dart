@@ -4,9 +4,7 @@ import 'package:barnasht_app/core/widgets/custom_button_widget.dart';
 import 'package:barnasht_app/core/widgets/custom_text_form_field.dart';
 import 'package:barnasht_app/core/widgets/password_field.dart';
 import 'package:barnasht_app/features/auth/presentation/cubits/signin_cubit/signin_cubit.dart';
-import 'package:barnasht_app/features/auth/presentation/views/widgets/or_divider.dart';
 import 'package:barnasht_app/features/auth/presentation/views/widgets/signin_widgets/dont_have_an_account_widget.dart';
-import 'package:barnasht_app/features/auth/presentation/views/widgets/social_signin_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -98,18 +96,18 @@ class _SigninViewBodyState extends State<SigninViewBody> {
 
                   const SizedBox(height: 24),
 
-                  const OrDivider(),
+                  // const OrDivider(),
 
-                  const SizedBox(height: 16),
+                  // const SizedBox(height: 16),
 
-                  SocialLoginButton(
-                    onPressed: () {
-                      context.read<SigninCubit>().signinWithGoogle();
-                    },
-                    image: Assets.imagesGoogleIcon,
-                    title: 'تسجيل بواسطة جوجل',
-                  ),
-                  SizedBox(height: 16),
+                  // SocialLoginButton(
+                  //   onPressed: () {
+                  //     context.read<SigninCubit>().signinWithGoogle();
+                  //   },
+                  //   image: Assets.imagesGoogleIcon,
+                  //   title: 'تسجيل بواسطة جوجل',
+                  // ),
+                  // SizedBox(height: 16),
                 ],
               ),
             ),

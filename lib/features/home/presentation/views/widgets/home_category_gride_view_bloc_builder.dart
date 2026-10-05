@@ -2,6 +2,7 @@ import 'package:barnasht_app/core/helper_functions/get_dummy_category.dart';
 import 'package:barnasht_app/core/widgets/custom_error_widget.dart';
 import 'package:barnasht_app/features/home/presentation/cubits/category_cubit.dart';
 import 'package:barnasht_app/features/home/presentation/cubits/category_state.dart';
+import 'package:barnasht_app/features/home/presentation/views/all_categories_view.dart';
 import 'package:barnasht_app/features/home/presentation/views/widgets/custom_empty_categories_widget.dart';
 import 'package:barnasht_app/features/home/presentation/views/widgets/home_category_gride_view.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,16 @@ class HomeCategoryGrideViewBlocBuilder extends StatelessWidget {
             );
           }
 
-          return HomeCategoryGrideView(categories: categories);
+          return HomeCategoryGrideView(
+            categories: categories,
+            onSeeMore: () {
+              Navigator.pushNamed(
+                context,
+                AllCategoriesView.routeName,
+                arguments: categories,
+              );
+            },
+          );
         }
 
         return const SliverToBoxAdapter(child: SizedBox.shrink());

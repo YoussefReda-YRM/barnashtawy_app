@@ -1,12 +1,15 @@
 import 'package:barnasht_app/core/services/database_service.dart';
 import 'package:barnasht_app/core/services/fire_store_service.dart';
 import 'package:barnasht_app/core/services/firebase_auth_service.dart';
+import 'package:barnasht_app/core/services/location_service.dart';
+import 'package:barnasht_app/core/services/notification_service.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cubit.dart';
 import 'package:barnasht_app/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:barnasht_app/features/auth/domain/repos/auth_repo.dart';
 import 'package:barnasht_app/features/home/data/repos/category_repo_impl.dart';
 import 'package:barnasht_app/features/home/domain/repos/category_repo.dart';
 import 'package:barnasht_app/features/home/presentation/cubits/category_cubit.dart';
+
 import 'package:barnasht_app/features/places/data/repos/place_repo_impl.dart';
 import 'package:barnasht_app/features/places/domain/repos/place_repo.dart';
 import 'package:barnasht_app/features/places/presentation/cubits/place_cubit.dart';
@@ -52,7 +55,10 @@ void setupGetIt() {
   );
 
   getIt.registerFactory<PlaceCubit>(
-    () => PlaceCubit(placeRepo: getIt<PlaceRepo>()),
+    () => PlaceCubit(
+      placeRepo: getIt<PlaceRepo>(),
+      locationService: getIt<LocationService>(),
+    ),
   );
 
   getIt.registerFactory<AddPlaceCubit>(
@@ -65,4 +71,8 @@ void setupGetIt() {
       authRepo: getIt<AuthRepo>(),
     ),
   );
+
+  getIt.registerLazySingleton<LocationService>(() => LocationService());
+
+  getIt.registerLazySingleton<NotificationService>(() => NotificationService());
 }

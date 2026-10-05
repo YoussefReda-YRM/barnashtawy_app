@@ -75,29 +75,17 @@ class AppBarPlaceViewWidget extends StatelessWidget {
                 child: Container(
                   height: 40,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 7,
+                    horizontal: 12,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
                     color: colorScheme.primary,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.add_rounded,
-                        size: 19,
-                        color: colorScheme.onPrimary,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        'طلب إضافة مكان',
-                        style: TextStyles.bold11.copyWith(
-                          color: colorScheme.onPrimary,
-                        ),
-                      ),
-                    ],
+                  child: Icon(
+                    Icons.add_rounded,
+                    size: 22,
+                    color: colorScheme.onPrimary,
                   ),
                 ),
               ),

@@ -1,0 +1,4 @@
+enum PermissionPageType {
+  location,
+  notification,
+}

@@ -2,14 +2,11 @@ import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:barnasht_app/core/widgets/custom_progress_hud.dart';
 import 'package:barnasht_app/features/auth/presentation/cubits/signin_cubit/signin_cubit.dart';
 import 'package:barnasht_app/features/auth/presentation/views/widgets/signin_widgets/signin_view_body.dart';
-import 'package:barnasht_app/features/profile/presentation/views/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SigninViewBodyBlocConsumer extends StatelessWidget {
-  const SigninViewBodyBlocConsumer({super.key, required this.isProfile});
-
-  final bool isProfile;
+  const SigninViewBodyBlocConsumer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +18,8 @@ class SigninViewBodyBlocConsumer extends StatelessWidget {
             'تم تسجيل الدخول بنجاح',
             type: SnackBarType.success,
           );
-          isProfile
-              ? Navigator.pushReplacementNamed(context, ProfileView.routeName)
-              : Navigator.pop(context);
+
+          Navigator.pop(context, true);
         }
 
         if (state is SigninFailure) {

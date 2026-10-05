@@ -46,7 +46,7 @@ class ProfileLoadingView extends StatelessWidget {
 
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: LogoutWidget(colorScheme: colorScheme),
+            child: LogoutWidget(colorScheme: colorScheme, onLoggedOut: () {}),
           ),
         ],
       ),

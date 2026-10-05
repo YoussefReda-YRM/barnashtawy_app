@@ -1,7 +1,6 @@
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:flutter/material.dart';
-import 'package:svg_flutter/svg.dart';
 
 class PlaceCard extends StatelessWidget {
   const PlaceCard({
@@ -71,7 +70,7 @@ class PlaceCard extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(6.0),
                         child: placeImage.trim().isNotEmpty
-                            ? SvgPicture.asset(placeImage, fit: BoxFit.contain)
+                            ? Image.asset(placeImage, fit: BoxFit.contain)
                             : Icon(
                                 Icons.place_outlined,
                                 size: 28,

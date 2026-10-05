@@ -1,3 +1,4 @@
+import 'package:barnasht_app/core/utils/app_images.dart';
 import 'package:barnasht_app/features/home/presentation/views/widgets/app_bar_widget.dart';
 import 'package:barnasht_app/features/home/presentation/views/widgets/home_category_gride_view_bloc_builder.dart';
 import 'package:barnasht_app/features/home/presentation/views/widgets/to_contact_us_widget.dart';
@@ -23,12 +24,29 @@ class HomeViewBody extends StatelessWidget {
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              SliverToBoxAdapter(child: const SizedBox(height: 16)),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+              // كارت الخدمات
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 8,
+                      child: Image.asset(Assets.imagesBannar, fit: BoxFit.cover)),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 18)),
+
+              // الفئات
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: HomeCategoryGrideViewBlocBuilder(),
               ),
-              SliverToBoxAdapter(child: const SizedBox(height: 16)),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           ),
         ),

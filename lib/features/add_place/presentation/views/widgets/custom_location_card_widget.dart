@@ -1,4 +1,4 @@
-import 'package:barnasht_app/core/utils/app_images.dart';
+import 'package:barnasht_app/core/helper_functions/get_location_name.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:flutter/foundation.dart';
@@ -27,139 +27,54 @@ class CustomLocationCardWidget extends StatefulWidget {
 class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
   GoogleMapController? _mapController;
 
-  // ============================================================
-  // BARNSHT BOUNDARY
-  // ============================================================
-
-  static const List<LatLng> _barnashtBoundary = [
-    LatLng(29.70594145769904, 31.25065730002415),
-    LatLng(29.70584825035551, 31.249906265550422),
-    LatLng(29.70570844522191, 31.249208877344305),
-    LatLng(29.706015973590112, 31.24916594550027),
-    LatLng(29.70583883953148, 31.24720249829482),
-    LatLng(29.7044036964276, 31.247224053929383),
-    LatLng(29.700564285158215, 31.2456255201411),
-    LatLng(29.698253053309116, 31.24446681427239),
-    LatLng(29.697833622285344, 31.243190084644098),
-    LatLng(29.6977496901967, 31.242052807522473),
-    LatLng(29.69750739002469, 31.23922035595823),
-    LatLng(29.696631376969634, 31.23943489941603),
-    LatLng(29.696211988621076, 31.239563675307494),
-    LatLng(29.693055849041706, 31.23816994642528),
-
-    // start 3ezba
-    LatLng(29.691801871226314, 31.23813394982131),
-    LatLng(29.69177041965287, 31.23643781584134),
-    LatLng(29.689235990494893, 31.236194071537902),
-    LatLng(29.68917721183956, 31.236527880888904),
-    LatLng(29.6861230755962, 31.235832709280754),
-    // end 3ezba
-
-    LatLng(29.685844491389055, 31.240375456287474),
-
-    // تكملة برنشت قبل إضافة العزبة
-    LatLng(29.68413393589217, 31.24005399155596),
-    LatLng(29.684356269224565, 31.254853991251913),
-    LatLng(29.688346562343654, 31.25365473021804),
-    LatLng(29.68954364399999, 31.25926855473388),
-    LatLng(29.70519284256306, 31.25477728325718),
-    LatLng(29.705946300304888, 31.25077070574582),
-  ];
-
-  // ============================================================
-  // BARNSHT BOUNDS
-  // ============================================================
-
-  static LatLngBounds get _barnashtBounds {
-    double minLat = _barnashtBoundary.first.latitude;
-    double maxLat = _barnashtBoundary.first.latitude;
-
-    double minLng = _barnashtBoundary.first.longitude;
-    double maxLng = _barnashtBoundary.first.longitude;
-
-    for (final point in _barnashtBoundary) {
-      if (point.latitude < minLat) {
-        minLat = point.latitude;
-      }
-
-      if (point.latitude > maxLat) {
-        maxLat = point.latitude;
-      }
-
-      if (point.longitude < minLng) {
-        minLng = point.longitude;
-      }
-
-      if (point.longitude > maxLng) {
-        maxLng = point.longitude;
-      }
-    }
-
-    return LatLngBounds(
-      southwest: LatLng(minLat, minLng),
-      northeast: LatLng(maxLat, maxLng),
-    );
-  }
-
   LatLng? _selectedLocation;
-
-  /// مكان الـ Pin الظاهر على الخريطة.
-  /// وجوده لا يعني أن المستخدم اختار الموقع.
   LatLng? _pinLocation;
-
-  LatLng? _previousLocation;
-
-  // ============================================================
-  // DRAG LOCATION
-  // ============================================================
-
   LatLng? _draggedLocation;
 
+  String? _locationName;
+
+  bool _isGettingLocationName = false;
   bool _isDraggingMarker = false;
+  bool _isGettingLocation = false;
+  bool _mapInitialized = false;
 
   Offset? _markerOffset;
 
-  // ============================================================
-  // STATE
-  // ============================================================
-
-  bool _isGettingLocation = false;
-
-  bool _mapInitialized = false;
-
-  // ============================================================
-  // BARNSHTAWY MARKER
-  // ============================================================
-
-  static const String _markerAsset = Assets.imagesAppLogoTransparent;
-
-  static const double _markerSize = 70;
+  static const double _markerSize = 40;
 
   final GlobalKey _mapKey = GlobalKey();
-
-  // ============================================================
-  // INIT STATE
-  // ============================================================
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.initialLocation != null &&
-        _isInsideBarnasht(widget.initialLocation!)) {
+    if (widget.initialLocation != null) {
       _selectedLocation = widget.initialLocation;
       _pinLocation = widget.initialLocation;
+      _loadLocationName(widget.initialLocation!);
     }
   }
 
-  // ============================================================
-  // UPDATE MARKER SCREEN POSITION
-  // ============================================================
+  Future<void> _loadLocationName(LatLng location) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isGettingLocationName = true;
+      _locationName = null;
+    });
+
+    final String? name = await LocationUtils.getLocationName(location);
+
+    if (!mounted) return;
+
+    setState(() {
+      _locationName = name;
+      _isGettingLocationName = false;
+    });
+  }
 
   Future<void> _updateMarkerScreenPosition() async {
-    if (_mapController == null || _pinLocation == null) {
-      return;
-    }
+    if (_mapController == null || _pinLocation == null) return;
 
     try {
       final ScreenCoordinate screenCoordinate = await _mapController!
@@ -169,35 +84,26 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
       final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
-      final double x = screenCoordinate.x / devicePixelRatio;
-      final double y = screenCoordinate.y / devicePixelRatio;
-
       setState(() {
-        _markerOffset = Offset(x - (_markerSize / 2), y - _markerSize);
+        _markerOffset = Offset(
+          screenCoordinate.x / devicePixelRatio - (_markerSize / 2),
+          screenCoordinate.y / devicePixelRatio - _markerSize,
+        );
       });
     } catch (e) {
-      debugPrint('Failed to update marker screen position: $e');
+      debugPrint('Failed to update marker position: $e');
     }
   }
-
-  // ============================================================
-  // MARKER DRAG START
-  // ============================================================
 
   void _onMarkerPanStart(DragStartDetails details) {
     if (_pinLocation == null) return;
 
-    _previousLocation = _pinLocation;
     _draggedLocation = _pinLocation;
 
     setState(() {
       _isDraggingMarker = true;
     });
   }
-
-  // ============================================================
-  // MARKER DRAG UPDATE
-  // ============================================================
 
   Future<void> _onMarkerPanUpdate(DragUpdateDetails details) async {
     if (_mapController == null) return;
@@ -208,9 +114,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
     if (mapBox == null) return;
 
     final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-
     final Offset mapGlobalPosition = mapBox.localToGlobal(Offset.zero);
-
     final Offset localPosition = details.globalPosition - mapGlobalPosition;
 
     final ScreenCoordinate screenCoordinate = ScreenCoordinate(
@@ -228,7 +132,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       setState(() {
         _draggedLocation = newLocation;
         _pinLocation = newLocation;
-
         _markerOffset = Offset(
           localPosition.dx - (_markerSize / 2),
           localPosition.dy - _markerSize,
@@ -237,62 +140,33 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
     } catch (_) {}
   }
 
-  // ============================================================
-  // MARKER DRAG END
-  // ============================================================
-
   void _onMarkerPanEnd(DragEndDetails details) {
     setState(() {
       _isDraggingMarker = false;
     });
 
-    final LatLng? newLocation = _draggedLocation;
+    final LatLng? location = _draggedLocation;
 
-    if (newLocation == null) return;
-
-    if (!_isInsideBarnasht(newLocation)) {
-      buildBar(
-        context,
-        'الموقع خارج نطاق قرية برنشت، اختر موقعًا داخل القرية',
-        type: SnackBarType.info,
-      );
-
-      if (_previousLocation != null) {
-        setState(() {
-          _pinLocation = _previousLocation;
-        });
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _updateMarkerScreenPosition();
-        });
-      }
-
-      return;
+    if (location != null) {
+      _updateSelectedLocation(location);
     }
-
-    _updateSelectedLocation(newLocation);
   }
-
-  // ============================================================
-  // UPDATE SELECTED LOCATION
-  // ============================================================
 
   void _updateSelectedLocation(LatLng location) {
     setState(() {
       _selectedLocation = location;
       _pinLocation = location;
+      _locationName = null;
+      _isGettingLocationName = true;
     });
 
     widget.onLocationChanged(location);
+    _loadLocationName(location);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateMarkerScreenPosition();
     });
   }
-
-  // ============================================================
-  // USE MY LOCATION
-  // ============================================================
 
   Future<void> _useMyLocation() async {
     if (_isGettingLocation) return;
@@ -312,7 +186,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
           'من فضلك قم بتفعيل خدمة الموقع',
           type: SnackBarType.info,
         );
-
         return;
       }
 
@@ -326,7 +199,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
         if (!mounted) return;
 
         buildBar(context, 'تم رفض صلاحية الموقع', type: SnackBarType.info);
-
         return;
       }
 
@@ -338,7 +210,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
           'صلاحية الموقع مرفوضة نهائيًا، قم بتفعيلها من إعدادات التطبيق',
           type: SnackBarType.info,
         );
-
         return;
       }
 
@@ -349,18 +220,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       );
 
       final LatLng location = LatLng(position.latitude, position.longitude);
-
-      if (!_isInsideBarnasht(location)) {
-        if (!mounted) return;
-
-        buildBar(
-          context,
-          'موقعك الحالي خارج نطاق قرية برنشت',
-          type: SnackBarType.info,
-        );
-
-        return;
-      }
 
       _updateSelectedLocation(location);
 
@@ -373,9 +232,8 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       }
 
       await Future.delayed(const Duration(milliseconds: 300));
-
       await _updateMarkerScreenPosition();
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
 
       buildBar(context, 'حدث خطأ أثناء تحديد موقعك', type: SnackBarType.info);
@@ -388,16 +246,8 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
     }
   }
 
-  // ============================================================
-  // INITIAL USER LOCATION
-  // ============================================================
-
   Future<void> _initializeUserLocation() async {
-    // في حالة التعديل، لا نستبدل موقع المكان القديم
-    // بموقع المستخدم الحالي.
-    if (widget.initialLocation != null) {
-      return;
-    }
+    if (widget.initialLocation != null) return;
 
     try {
       final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -423,17 +273,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
 
       final LatLng location = LatLng(position.latitude, position.longitude);
 
-      if (!_isInsideBarnasht(location)) {
-        if (!mounted) return;
-
-        buildBar(
-          context,
-          'موقعك الحالي خارج نطاق قرية برنشت',
-          type: SnackBarType.info,
-        );
-
-        return;
-      }
+      if (!mounted) return;
 
       setState(() {
         _pinLocation = location;
@@ -448,74 +288,20 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
       }
 
       await Future.delayed(const Duration(milliseconds: 300));
-
       await _updateMarkerScreenPosition();
     } catch (_) {}
   }
 
-  // ============================================================
-  // CHECK LOCATION INSIDE BARNSHT
-  // ============================================================
-
-  bool _isInsideBarnasht(LatLng point) {
-    bool inside = false;
-
-    for (
-      int i = 0, j = _barnashtBoundary.length - 1;
-      i < _barnashtBoundary.length;
-      j = i++
-    ) {
-      final double xi = _barnashtBoundary[i].latitude;
-      final double yi = _barnashtBoundary[i].longitude;
-
-      final double xj = _barnashtBoundary[j].latitude;
-      final double yj = _barnashtBoundary[j].longitude;
-
-      final bool intersect =
-          ((yi > point.longitude) != (yj > point.longitude)) &&
-          (point.latitude <
-              (xj - xi) * (point.longitude - yi) / (yj - yi) + xi);
-
-      if (intersect) {
-        inside = !inside;
-      }
-    }
-
-    return inside;
-  }
-
-  // ============================================================
-  // MAP TAP
-  // ============================================================
-
   void _onMapTap(LatLng location) {
-    if (!_isInsideBarnasht(location)) {
-      buildBar(
-        context,
-        'الموقع خارج نطاق قرية برنشت، اختر موقعًا داخل القرية',
-        type: SnackBarType.info,
-      );
-
-      return;
-    }
-
-    _previousLocation = _pinLocation;
-
     _updateSelectedLocation(location);
   }
 
-  // ============================================================
-  // BUILD
-  // ============================================================
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final hasLocation = _selectedLocation != null;
-
-    final successColor = colorScheme.primary;
-    final errorColor = colorScheme.error;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool hasLocation = _selectedLocation != null;
+    final Color successColor = colorScheme.primary;
+    final Color errorColor = colorScheme.error;
 
     return Container(
       decoration: BoxDecoration(
@@ -540,10 +326,6 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ==================================================
-            // HEADER
-            // ==================================================
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
               child: Row(
@@ -561,9 +343,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                       size: 21,
                     ),
                   ),
-
                   const SizedBox(width: 9),
-
                   Expanded(
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -586,9 +366,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                       ],
                     ),
                   ),
-
                   const SizedBox(width: 8),
-
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -635,12 +413,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                 ],
               ),
             ),
-
             const SizedBox(height: 10),
-
-            // ==================================================
-            // MAP
-            // ==================================================
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: SizedBox(
@@ -652,19 +425,11 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                       initialCameraPosition: CameraPosition(
                         target:
                             widget.initialLocation ??
-                            const LatLng(29.695, 31.247),
-                        zoom: widget.initialLocation != null ? 18 : 14,
+                            const LatLng(30.0444, 31.2357),
+                        zoom: widget.initialLocation != null ? 18 : 12,
                       ),
-
-                      cameraTargetBounds: CameraTargetBounds(_barnashtBounds),
-
-                      minMaxZoomPreference: const MinMaxZoomPreference(
-                        13.0,
-                        20.0,
-                      ),
-
+                      minMaxZoomPreference: const MinMaxZoomPreference(2, 20),
                       onTap: _onMapTap,
-
                       onMapCreated: (controller) async {
                         _mapController = controller;
 
@@ -687,63 +452,33 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                           );
                         } else {
                           await _initializeUserLocation();
-
-                          if (_pinLocation == null) {
-                            await controller.animateCamera(
-                              CameraUpdate.newLatLngBounds(_barnashtBounds, 30),
-                            );
-                          }
                         }
 
                         await Future.delayed(const Duration(milliseconds: 150));
 
                         await _updateMarkerScreenPosition();
                       },
-
                       onCameraMove: (_) {
                         if (!_isDraggingMarker) {
                           _updateMarkerScreenPosition();
                         }
                       },
-
-                      onCameraIdle: () {
-                        _updateMarkerScreenPosition();
-                      },
-
-                      polygons: {
-                        Polygon(
-                          polygonId: const PolygonId('barnasht_boundary'),
-                          points: _barnashtBoundary,
-                          strokeWidth: 2,
-                          strokeColor: successColor,
-                          fillColor: successColor.withValues(alpha: 0.08),
-                        ),
-                      },
-
+                      onCameraIdle: _updateMarkerScreenPosition,
                       markers: const {},
-
                       myLocationEnabled: true,
                       myLocationButtonEnabled: false,
-
                       zoomControlsEnabled: false,
                       mapToolbarEnabled: false,
                       compassEnabled: false,
-
                       rotateGesturesEnabled: true,
                       scrollGesturesEnabled: true,
                       zoomGesturesEnabled: true,
-
-                      gestureRecognizers:
-                          <Factory<OneSequenceGestureRecognizer>>{
-                            Factory<OneSequenceGestureRecognizer>(
-                              () => EagerGestureRecognizer(),
-                            ),
-                          },
+                      gestureRecognizers: {
+                        Factory<OneSequenceGestureRecognizer>(
+                          () => EagerGestureRecognizer(),
+                        ),
+                      },
                     ),
-
-                    // ==================================================
-                    // CUSTOM DRAGGABLE MARKER
-                    // ==================================================
                     if (_pinLocation != null && _markerOffset != null)
                       Positioned(
                         left: _markerOffset!.dx,
@@ -755,18 +490,13 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                           onPanStart: _onMarkerPanStart,
                           onPanUpdate: _onMarkerPanUpdate,
                           onPanEnd: _onMarkerPanEnd,
-                          child: Image.asset(
-                            _markerAsset,
-                            width: _markerSize,
-                            height: _markerSize,
-                            fit: BoxFit.contain,
+                          child: Icon(
+                            Icons.location_pin,
+                            size: _markerSize,
+                            color: colorScheme.primary,
                           ),
                         ),
                       ),
-
-                    // ==================================================
-                    // LOADING
-                    // ==================================================
                     if (_isGettingLocation)
                       Positioned.fill(
                         child: Container(
@@ -780,12 +510,7 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
-
-            // ==================================================
-            // LOCATION STATUS
-            // ==================================================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -805,33 +530,38 @@ class _CustomLocationCardWidgetState extends State<CustomLocationCardWidget> {
                     size: 18,
                     color: hasLocation ? successColor : errorColor,
                   ),
-
                   const SizedBox(width: 7),
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          hasLocation ? 'الموقع المحدد' : 'الموقع مطلوب',
+                          hasLocation ? 'اسم المكان' : 'الموقع مطلوب',
                           style: TextStyles.semiBold11.copyWith(
                             color: hasLocation ? successColor : errorColor,
                           ),
                         ),
-
                         const SizedBox(height: 3),
-
-                        Text(
-                          hasLocation
-                              ? '${_selectedLocation!.latitude.toStringAsFixed(6)} , '
-                                    '${_selectedLocation!.longitude.toStringAsFixed(6)}'
-                              : 'حرّك علامة برنشتاوي إلى موقع المكان اللي تريد اضافتة أو اضغط "استخدم موقعي" لتحديد موقعك اللي واقف فيه',
-                          style: TextStyles.regular11.copyWith(
-                            color: colorScheme.onSurface.withValues(
-                              alpha: 0.75,
+                        if (hasLocation && _isGettingLocationName)
+                          Text(
+                            'جاري تحديد اسم المكان...',
+                            style: TextStyles.regular11.copyWith(
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.75,
+                              ),
+                            ),
+                          )
+                        else
+                          Text(
+                            hasLocation
+                                ? (_locationName ?? 'تعذر تحديد اسم المكان')
+                                : 'حدّد موقع المكان على الخريطة أو استخدم موقعك الحالي.',
+                            style: TextStyles.regular11.copyWith(
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.75,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),

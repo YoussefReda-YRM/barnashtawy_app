@@ -9,22 +9,12 @@ class FavoritesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        customAppBar(context, title: 'المفضلة', showBackButton: false),
 
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: colorScheme.surface,
-        body: SafeArea(
-          child: Column(
-            children: [
-              customAppBar(context, title: 'المفضلة'),
-
-              const Expanded(child: FavoritePlaceViewBody()),
-            ],
-          ),
-        ),
-      ),
+        const Expanded(child: FavoritePlaceViewBody()),
+    ],
     );
   }
 }

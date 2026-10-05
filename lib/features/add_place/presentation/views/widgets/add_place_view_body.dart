@@ -1,10 +1,11 @@
+import 'package:barnasht_app/core/helper_functions/get_location_name.dart';
 import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:barnasht_app/core/widgets/custom_app_bar.dart';
+import 'package:barnasht_app/core/widgets/custom_button_widget.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cubit.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_state.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/widgets/custom_location_card_widget.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/widgets/custom_text_form_field_and_label.dart';
-import 'package:barnasht_app/core/widgets/custom_button_widget.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,6 @@ class AddPlaceViewBody extends StatefulWidget {
   final CategoryEntity category;
   final PlaceEntity? place;
   final bool isEditing;
-
   final Future<void> Function(PlaceEntity place)? onUpdate;
 
   @override
@@ -40,8 +40,10 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
 
   double? _selectedLatitude;
   double? _selectedLongitude;
+  String? _locationName;
 
   bool _isUpdating = false;
+  bool _isLoadingLocationName = false;
 
   @override
   void initState() {
@@ -62,6 +64,7 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
 
     _selectedLatitude = place.latitude;
     _selectedLongitude = place.longitude;
+    _locationName = place.locationName;
   }
 
   @override
@@ -74,24 +77,47 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
     super.dispose();
   }
 
-  // ============================================================
-  // SUBMIT PLACE
-  // ============================================================
+  Future<void> _onLocationChanged(LatLng? location) async {
+    if (location == null) {
+      setState(() {
+        _selectedLatitude = null;
+        _selectedLongitude = null;
+        _locationName = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _selectedLatitude = location.latitude;
+      _selectedLongitude = location.longitude;
+      _locationName = null;
+      _isLoadingLocationName = true;
+    });
+
+    final locationName = await LocationUtils.getLocationName(location);
+
+    if (!mounted) return;
+
+    setState(() {
+      _locationName = locationName;
+      _isLoadingLocationName = false;
+    });
+
+    if (locationName == null || locationName.trim().isEmpty) {
+      buildBar(
+        context,
+        'تعذر تحديد اسم المكان، حاول تحديد الموقع مرة أخرى',
+        type: SnackBarType.error,
+      );
+    }
+  }
 
   Future<void> _submitPlace() async {
-    // ============================================================
-    // FORM VALIDATION
-    // ============================================================
-
     final isValid = _formKey.currentState?.validate() ?? false;
 
     if (!isValid) {
       return;
     }
-
-    // ============================================================
-    // LOCATION VALIDATION
-    // ============================================================
 
     if (_selectedLatitude == null || _selectedLongitude == null) {
       buildBar(
@@ -102,9 +128,23 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
       return;
     }
 
-    // ============================================================
-    // EDIT
-    // ============================================================
+    if (_isLoadingLocationName) {
+      buildBar(
+        context,
+        'جارٍ تحديد عنوان المكان، انتظر لحظة',
+        type: SnackBarType.warning,
+      );
+      return;
+    }
+
+    if (_locationName == null || _locationName!.trim().isEmpty) {
+      buildBar(
+        context,
+        'لم يتم تحديد اسم الموقع، من فضلك اختر الموقع مرة أخرى',
+        type: SnackBarType.warning,
+      );
+      return;
+    }
 
     if (widget.isEditing && widget.place != null) {
       final place = widget.place!;
@@ -115,6 +155,7 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
         userId: place.userId,
         placeName: _nameController.text.trim(),
         placeAddress: _addressController.text.trim(),
+        locationName: _locationName,
         placeDescription: _descriptionController.text.trim(),
         phoneNumber: _phoneController.text.trim().isEmpty
             ? null
@@ -174,16 +215,13 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
       return;
     }
 
-    // ============================================================
-    // ADD
-    // ============================================================
-
     context.read<AddPlaceCubit>().addPlace(
       categoryId: widget.category.id,
       placeName: _nameController.text.trim(),
       placeAddress: _addressController.text.trim(),
       placeDescription: _descriptionController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
+      locationName: _locationName,
       latitude: _selectedLatitude!,
       longitude: _selectedLongitude!,
     );
@@ -193,20 +231,18 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
   Widget build(BuildContext context) {
     final addPlaceState = context.watch<AddPlaceCubit>().state;
 
-    final isLoading = addPlaceState is AddPlaceLoading || _isUpdating;
+    final isLoading =
+        addPlaceState is AddPlaceLoading ||
+        _isUpdating ||
+        _isLoadingLocationName;
 
     return Column(
       children: [
-        // ========================================================
-        // APP BAR
-        // ========================================================
-
         customAppBar(
           context,
           title: widget.isEditing ? 'تعديل المكان' : 'إضافة مكان جديد',
           showBackButton: true,
         ),
-
         Expanded(
           child: Form(
             key: _formKey,
@@ -216,10 +252,6 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ==================================================
-                  // LOCATION
-                  // ==================================================
-
                   CustomLocationCardWidget(
                     initialLocation: widget.isEditing && widget.place != null
                         ? LatLng(
@@ -227,27 +259,9 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
                             widget.place!.longitude,
                           )
                         : null,
-                    onLocationChanged: (location) {
-                      if (location == null) {
-                        setState(() {
-                          _selectedLatitude = null;
-                          _selectedLongitude = null;
-                        });
-                        return;
-                      }
-
-                      setState(() {
-                        _selectedLatitude = location.latitude;
-                        _selectedLongitude = location.longitude;
-                      });
-                    },
+                    onLocationChanged: _onLocationChanged,
                   ),
-
                   const SizedBox(height: 18),
-
-                  // ==================================================
-                  // NAME
-                  // ==================================================
                   CustomTextFormFieldAndLabel(
                     label: 'اسم المكان',
                     hint: 'اكتب اسم المكان',
@@ -264,12 +278,7 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 14),
-
-                  // ==================================================
-                  // DESCRIPTION
-                  // ==================================================
                   CustomTextFormFieldAndLabel(
                     label: 'وصف المكان',
                     hint: 'اكتب وصفًا مختصرًا للمكان',
@@ -287,12 +296,7 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 14),
-
-                  // ==================================================
-                  // ADDRESS
-                  // ==================================================
                   CustomTextFormFieldAndLabel(
                     label: 'العنوان',
                     hint: 'اكتب عنوان المكان',
@@ -306,12 +310,7 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 14),
-
-                  // ==================================================
-                  // PHONE
-                  // ==================================================
                   CustomTextFormFieldAndLabel(
                     label: 'رقم الموبايل (اختياري)',
                     hint: 'اكتب رقم موبايل المكان',
@@ -332,12 +331,7 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 22),
-
-                  // ==================================================
-                  // BUTTON
-                  // ==================================================
                   CustomButtonWidget(
                     text: widget.isEditing
                         ? 'حفظ تعديلات المكان'
@@ -348,7 +342,6 @@ class _AddPlaceViewBodyState extends State<AddPlaceViewBody> {
                     onTap: isLoading ? null : _submitPlace,
                     isLoading: isLoading,
                   ),
-
                   const SizedBox(height: 10),
                 ],
               ),

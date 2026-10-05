@@ -1,3 +1,4 @@
+
 import 'package:barnasht_app/core/utils/app_images.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +16,8 @@ class SearchTextField extends StatefulWidget {
   });
 
   final String categoryName;
-
   final TextEditingController controller;
   final FocusNode focusNode;
-
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onFilterPressed;
@@ -27,12 +26,18 @@ class SearchTextField extends StatefulWidget {
   State<SearchTextField> createState() => _SearchTextFieldState();
 }
 
-class _SearchTextFieldState extends State<SearchTextField> {
+class _SearchTextFieldState extends State<SearchTextField>
+    with WidgetsBindingObserver {
+  bool _keyboardWasVisible = false;
+
   @override
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addObserver(this);
+
     widget.controller.addListener(_onControllerChanged);
+    widget.focusNode.addListener(_onFocusChanged);
   }
 
   void _onControllerChanged() {
@@ -41,27 +46,70 @@ class _SearchTextFieldState extends State<SearchTextField> {
     }
   }
 
+  void _onFocusChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void didChangeMetrics() {
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+
+    if (views.isEmpty) return;
+
+    final bottomInset = views.first.viewInsets.bottom;
+    final keyboardVisible = bottomInset > 0;
+
+    // الكيبورد ظهر
+    if (keyboardVisible) {
+      _keyboardWasVisible = true;
+      return;
+    }
+
+    // الكيبورد اختفى بعد أن كان ظاهرًا
+    if (_keyboardWasVisible) {
+      _keyboardWasVisible = false;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        if (widget.focusNode.hasFocus) {
+          widget.focusNode.unfocus();
+        }
+      });
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
     widget.controller.removeListener(_onControllerChanged);
+    widget.focusNode.removeListener(_onFocusChanged);
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
     final bool hasText = widget.controller.text.isNotEmpty;
+    final bool isFocused = widget.focusNode.hasFocus;
 
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isFocused
+            ? [
+                BoxShadow(
+                  color: colorScheme.primary.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: TextField(
         controller: widget.controller,
@@ -89,24 +137,18 @@ class _SearchTextFieldState extends State<SearchTextField> {
               ),
             ),
           ),
-
           suffixIcon: hasText
               ? IconButton(
                   tooltip: 'مسح',
                   onPressed: () {
                     widget.controller.clear();
-
-                    // إبقاء الكيبورد مفتوحًا
                     widget.focusNode.requestFocus();
-
                     widget.onChanged?.call('');
                   },
                   icon: Icon(
                     Icons.close_rounded,
                     size: 20,
-                    color: colorScheme.primary.withValues(
-                      alpha: 0.65,
-                    ),
+                    color: colorScheme.primary.withValues(alpha: 0.65),
                   ),
                 )
               : IconButton(
@@ -120,23 +162,16 @@ class _SearchTextFieldState extends State<SearchTextField> {
                     ),
                   ),
                 ),
-
           hintText: 'ابحث عن ${widget.categoryName}...',
-
           hintStyle: TextStyles.regular13.copyWith(
-            color: colorScheme.onSurface.withValues(
-              alpha: 0.45,
-            ),
+            color: colorScheme.onSurface.withValues(alpha: 0.45),
           ),
-
           filled: true,
           fillColor: colorScheme.surface,
-
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
           ),
-
           border: buildBorder(colorScheme),
           enabledBorder: buildBorder(colorScheme),
           focusedBorder: buildFocusedBorder(colorScheme),
@@ -150,9 +185,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(
         width: 1,
-        color: colorScheme.primary.withValues(
-          alpha: 0.25,
-        ),
+        color: colorScheme.primary.withValues(alpha: 0.25),
       ),
     );
   }
@@ -162,10 +195,9 @@ class _SearchTextFieldState extends State<SearchTextField> {
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(
         width: 1.3,
-        color: colorScheme.primary.withValues(
-          alpha: 0.65,
-        ),
+        color: colorScheme.primary.withValues(alpha: 0.65),
       ),
     );
   }
 }
+

@@ -19,11 +19,13 @@ class ProfileViewBody extends StatelessWidget {
     required this.user,
     required this.places,
     required this.categories,
+    required this.onLoggedOut,
   });
 
   final UserEntity user;
   final List<PlaceEntity> places;
   final List<CategoryEntity> categories;
+  final VoidCallback onLoggedOut;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +72,10 @@ class ProfileViewBody extends StatelessWidget {
                   ...places.asMap().entries.map((entry) {
                     final index = entry.key;
                     final place = entry.value;
+                    final category = categories.firstWhere(
+                      (category) => category.id == place.categoryId,
+                      orElse: () => throw Exception('Category not found'),
+                    );
 
                     return Padding(
                       padding: EdgeInsets.only(
@@ -77,14 +83,10 @@ class ProfileViewBody extends StatelessWidget {
                       ),
                       child: MyPlaceCard(
                         place: place,
+                        category: category,
                         status: _getStatusText(place.status),
                         statusColor: _getStatusColor(place.status),
                         onEdit: () {
-                          final category = categories.firstWhere(
-                            (category) => category.id == place.categoryId,
-                            orElse: () => throw Exception('Category not found'),
-                          );
-
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => AddPlaceView(
@@ -126,7 +128,10 @@ class ProfileViewBody extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          child: LogoutWidget(colorScheme: colorScheme),
+          child: LogoutWidget(
+            colorScheme: colorScheme,
+            onLoggedOut: onLoggedOut,
+          ),
         ),
       ],
     );

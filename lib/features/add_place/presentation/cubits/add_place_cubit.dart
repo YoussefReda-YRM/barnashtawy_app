@@ -14,10 +14,10 @@ class AddPlaceCubit extends Cubit<AddPlaceState> {
     required String placeAddress,
     required String placeDescription,
     String? phoneNumber,
+    String? locationName,
     required double latitude,
     required double longitude,
   }) async {
-    // Prevent duplicate submissions.
     if (state is AddPlaceLoading) return;
 
     final category = categoryId.trim();
@@ -25,24 +25,31 @@ class AddPlaceCubit extends Cubit<AddPlaceState> {
     final address = placeAddress.trim();
     final description = placeDescription.trim();
     final phone = phoneNumber?.trim();
-
-    // ============================================================
-    // VALIDATION
-    // ============================================================
+    final selectedLocationName = locationName?.trim();
 
     if (category.isEmpty) {
-      emit(const AddPlaceValidationFailure(message: 'تصنيف المكان غير محدد'));
+      emit(
+        const AddPlaceValidationFailure(
+          message: 'تصنيف المكان غير محدد',
+        ),
+      );
       return;
     }
 
     if (name.isEmpty) {
-      emit(const AddPlaceValidationFailure(message: 'من فضلك اكتب اسم المكان'));
+      emit(
+        const AddPlaceValidationFailure(
+          message: 'من فضلك اكتب اسم المكان',
+        ),
+      );
       return;
     }
 
     if (address.isEmpty) {
       emit(
-        const AddPlaceValidationFailure(message: 'من فضلك اكتب عنوان المكان'),
+        const AddPlaceValidationFailure(
+          message: 'من فضلك اكتب عنوان المكان',
+        ),
       );
       return;
     }
@@ -56,27 +63,18 @@ class AddPlaceCubit extends Cubit<AddPlaceState> {
       return;
     }
 
-    // ============================================================
-    // LOADING
-    // ============================================================
-
     emit(AddPlaceLoading());
 
     try {
-      // ============================================================
-      // CREATE PLACE
-      // ============================================================
-
       final place = PlaceEntity(
         id: '',
         categoryId: category,
-
-        // يتم تحديد userId داخل PlaceRepoImpl
-        // من FirebaseAuth.currentUser.uid
         userId: '',
-
         placeName: name,
         placeAddress: address,
+        locationName: selectedLocationName?.isEmpty == true
+            ? null
+            : selectedLocationName,
         placeDescription: description,
         phoneNumber: phone?.isEmpty == true ? null : phone,
         latitude: latitude,
@@ -89,15 +87,7 @@ class AddPlaceCubit extends Cubit<AddPlaceState> {
         rejectionReason: null,
       );
 
-      // ============================================================
-      // ADD TO REPOSITORY
-      // ============================================================
-
       final result = await placeRepo.addPlace(place: place);
-
-      // ============================================================
-      // RESULT
-      // ============================================================
 
       result.fold(
         (failure) {

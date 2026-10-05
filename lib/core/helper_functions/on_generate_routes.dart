@@ -7,36 +7,43 @@ import 'package:barnasht_app/features/auth/presentation/views/signin_view.dart';
 import 'package:barnasht_app/features/auth/presentation/views/signup_view.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:barnasht_app/features/favorite_places/presentation/views/favorites_view.dart';
+import 'package:barnasht_app/features/home/presentation/views/all_categories_view.dart';
 import 'package:barnasht_app/features/home/presentation/views/home_view.dart';
+import 'package:barnasht_app/features/home/presentation/views/main_view.dart';
+import 'package:barnasht_app/features/permissions/presentation/views/permission_onboarding_view.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:barnasht_app/features/places/presentation/cubits/place_cubit.dart';
 import 'package:barnasht_app/features/places/presentation/views/details_place_view.dart';
 import 'package:barnasht_app/features/places/presentation/views/place_view.dart';
 import 'package:barnasht_app/features/profile/presentation/cubits/profile_cubit.dart';
 import 'package:barnasht_app/features/profile/presentation/views/edit_profile_view.dart';
-import 'package:barnasht_app/features/profile/presentation/views/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 Route<dynamic> onGenerateRoute(RouteSettings settings) {
   switch (settings.name) {
+    case MainView.routeName:
+      return MaterialPageRoute(builder: (context) => const MainView());
+    case PermissionOnboardingView.routeName:
+      return MaterialPageRoute(
+        builder: (context) => const PermissionOnboardingView(),
+      );
+
     case HomeView.routeName:
       return MaterialPageRoute(builder: (context) => const HomeView());
 
     case SigninView.routeName:
-      return MaterialPageRoute(
-        builder: (context) => SigninView(isProfile: settings.arguments as bool),
-      );
+      return MaterialPageRoute(builder: (context) => SigninView());
+
     case SignupView.routeName:
       return MaterialPageRoute(builder: (context) => const SignupView());
 
-    case ProfileView.routeName:
-      return MaterialPageRoute(builder: (context) => const ProfileView());
-
     case EditProfileView.routeName:
       final args = settings.arguments as Map<String, dynamic>;
+
       final user = args['user'] as UserEntity;
       final profileCubit = args['profileCubit'] as ProfileCubit;
+
       return MaterialPageRoute(
         builder: (_) => BlocProvider.value(
           value: profileCubit,
@@ -56,6 +63,7 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
           );
         },
       );
+
     case AddPlaceView.routeName:
       return MaterialPageRoute(
         builder: (context) => BlocProvider(
@@ -63,6 +71,7 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
           child: AddPlaceView(category: settings.arguments as CategoryEntity),
         ),
       );
+
     case DetailsPlaceView.routeName:
       final arguments = settings.arguments as Map<String, dynamic>;
 
@@ -73,9 +82,16 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
         builder: (context) =>
             DetailsPlaceView(place: place, placeImage: placeImage),
       );
+
     case FavoritesView.routeName:
       return MaterialPageRoute(builder: (context) => const FavoritesView());
 
+    case AllCategoriesView.routeName:
+      return MaterialPageRoute(
+        builder: (context) => AllCategoriesView(
+          categories: settings.arguments as List<CategoryEntity>,
+        ),
+      );
     default:
       return MaterialPageRoute(
         builder: (context) => const Scaffold(

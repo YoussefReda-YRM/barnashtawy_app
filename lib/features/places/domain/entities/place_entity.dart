@@ -1,10 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum PlaceStatus {
-  pending,
-  approved,
-  rejected,
-}
+enum PlaceStatus { pending, approved, rejected }
 
 class PlaceEntity extends Equatable {
   final String id;
@@ -13,6 +9,7 @@ class PlaceEntity extends Equatable {
 
   final String placeName;
   final String placeAddress;
+  final String? locationName;
   final String placeDescription;
   final String? phoneNumber;
 
@@ -34,6 +31,7 @@ class PlaceEntity extends Equatable {
     required this.userId,
     required this.placeName,
     required this.placeAddress,
+    this.locationName,
     required this.placeDescription,
     required this.latitude,
     required this.longitude,
@@ -48,20 +46,21 @@ class PlaceEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        categoryId,
-        userId,
-        placeName,
-        placeAddress,
-        placeDescription,
-        latitude,
-        longitude,
-        status,
-        createdAt,
-        phoneNumber,
-        updatedAt,
-        reviewedAt,
-        reviewedBy,
-        rejectionReason,
-      ];
+    id,
+    categoryId,
+    userId,
+    placeName,
+    placeAddress,
+    locationName,
+    placeDescription,
+    latitude,
+    longitude,
+    status,
+    createdAt,
+    phoneNumber,
+    updatedAt,
+    reviewedAt,
+    reviewedBy,
+    rejectionReason,
+  ];
 }
