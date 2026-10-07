@@ -103,7 +103,7 @@ Permissions are requested according to their role and necessity within the appli
 
 Barnashtawy is available on Google Play.
 
-**Google Play:** Coming soon / Available on Google Play
+**Google Play: https://play.google.com/store/apps/details?id=com.barnashtawy.app&pcampaignid=web_share
 
 ## 📂 Project Structure
 
