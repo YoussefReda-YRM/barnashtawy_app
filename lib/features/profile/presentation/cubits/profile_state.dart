@@ -15,18 +15,40 @@ class ProfileLoading extends ProfileState {
 
 class ProfileSuccess extends ProfileState {
   final UserEntity user;
-
   final List<PlaceEntity> places;
 
-  const ProfileSuccess({required this.user, required this.places});
+  const ProfileSuccess({
+    required this.user,
+    required this.places,
+  });
 }
 
 class ProfileFailure extends ProfileState {
   final String message;
 
-  const ProfileFailure({required this.message});
+  const ProfileFailure({
+    required this.message,
+  });
 }
 
 class ProfileUpdating extends ProfileState {
   const ProfileUpdating();
+}
+
+class ProfileDeleting extends ProfileState {
+  final ProfileSuccess previousState;
+
+  const ProfileDeleting({
+    required this.previousState,
+  });
+}
+
+class ProfileDeleteFailure extends ProfileState {
+  final String message;
+  final ProfileSuccess previousState;
+
+  const ProfileDeleteFailure({
+    required this.message,
+    required this.previousState,
+  });
 }

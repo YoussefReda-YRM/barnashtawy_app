@@ -1,3 +1,4 @@
+
 import 'package:barnasht_app/core/services/firebase_auth_service.dart';
 import 'package:barnasht_app/core/services/get_it_service.dart';
 import 'package:barnasht_app/core/widgets/build_bar.dart';
@@ -68,9 +69,17 @@ class ProfileView extends StatelessWidget {
           Expanded(
             child: BlocBuilder<ProfileCubit, ProfileState>(
               builder: (context, profileState) {
+                // ------------------------------------------------
+                // Loading profile
+                // ------------------------------------------------
+
                 if (profileState is ProfileLoading) {
                   return const ProfileLoadingView();
                 }
+
+                // ------------------------------------------------
+                // Profile loading/general failure
+                // ------------------------------------------------
 
                 if (profileState is ProfileFailure) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -94,13 +103,38 @@ class ProfileView extends StatelessWidget {
                   );
                 }
 
-                if (profileState is ProfileSuccess) {
+                // ------------------------------------------------
+                // Profile Success / Deleting / Delete Failure
+                // ------------------------------------------------
+
+                if (profileState is ProfileSuccess ||
+                    profileState is ProfileDeleting ||
+                    profileState is ProfileDeleteFailure) {
+                  final ProfileSuccess successState;
+
+                  if (profileState is ProfileSuccess) {
+                    successState = profileState;
+                  } else if (profileState is ProfileDeleting) {
+                    successState = profileState.previousState;
+                  } else {
+                    successState =
+                        (profileState as ProfileDeleteFailure).previousState;
+                  }
+
                   return BlocBuilder<CategoryCubit, CategoryState>(
                     builder: (context, categoryState) {
+                      // ------------------------------------------------
+                      // Loading categories
+                      // ------------------------------------------------
+
                       if (categoryState is CategoryLoading ||
                           categoryState is CategoryInitial) {
                         return const ProfileLoadingView();
                       }
+
+                      // ------------------------------------------------
+                      // Categories failure
+                      // ------------------------------------------------
 
                       if (categoryState is CategoryFailure) {
                         return Center(
@@ -114,10 +148,14 @@ class ProfileView extends StatelessWidget {
                         );
                       }
 
+                      // ------------------------------------------------
+                      // Categories success
+                      // ------------------------------------------------
+
                       if (categoryState is CategorySuccess) {
                         return ProfileViewBody(
-                          user: profileState.user,
-                          places: profileState.places,
+                          user: successState.user,
+                          places: successState.places,
                           categories: categoryState.categories,
                           onLoggedOut: onLoggedOut,
                         );

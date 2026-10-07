@@ -31,14 +31,15 @@ class Prefs {
     return _instance.getString(key) ?? '';
   }
 
+  static Future<void> remove(String key) async {
+    await _instance.remove(key);
+  }
+
   // ============================================================
   // LIST
   // ============================================================
 
-  static Future<void> setStringList(
-    String key,
-    List<String> value,
-  ) async {
+  static Future<void> setStringList(String key, List<String> value) async {
     await _instance.setStringList(key, value);
   }
 

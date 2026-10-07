@@ -4,6 +4,7 @@ import 'package:barnasht_app/core/widgets/custom_button_widget.dart';
 import 'package:barnasht_app/core/widgets/custom_text_form_field.dart';
 import 'package:barnasht_app/core/widgets/password_field.dart';
 import 'package:barnasht_app/features/auth/presentation/cubits/signin_cubit/signin_cubit.dart';
+import 'package:barnasht_app/features/auth/presentation/views/forgot_password_view.dart';
 import 'package:barnasht_app/features/auth/presentation/views/widgets/signin_widgets/dont_have_an_account_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -84,12 +85,27 @@ class _SigninViewBodyState extends State<SigninViewBody> {
 
                   const SizedBox(height: 16),
 
-                  PasswordField(controller: passwordController),
+                  PasswordField(
+                    controller: passwordController,
+                    hint: 'كلمة السر',
+                  ),
 
-                  const SizedBox(height: 33),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          ForgotPasswordView.routeName,
+                        );
+                      },
+                      child: const Text('هل نسيت كلمة السر؟'),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
 
                   CustomButtonWidget(onTap: signin, text: 'تسجيل دخول'),
-
                   const SizedBox(height: 33),
 
                   const DontHaveAnAccountWidget(),

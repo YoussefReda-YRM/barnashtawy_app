@@ -3,6 +3,9 @@ import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cubit.dart';
 import 'package:barnasht_app/features/add_place/presentation/views/add_place_view.dart';
 import 'package:barnasht_app/features/auth/domain/entities/auth_entity.dart';
+import 'package:barnasht_app/features/auth/presentation/cubits/forgot_password_cubit/forgot_password_cubit.dart';
+import 'package:barnasht_app/features/auth/presentation/views/email_verification_view.dart';
+import 'package:barnasht_app/features/auth/presentation/views/forgot_password_view.dart';
 import 'package:barnasht_app/features/auth/presentation/views/signin_view.dart';
 import 'package:barnasht_app/features/auth/presentation/views/signup_view.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
@@ -37,6 +40,17 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
 
     case SignupView.routeName:
       return MaterialPageRoute(builder: (context) => const SignupView());
+    case EmailVerificationView.routeName:
+      return MaterialPageRoute(
+        builder: (context) => const EmailVerificationView(),
+      );
+    case ForgotPasswordView.routeName:
+      return MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => getIt<ForgotPasswordCubit>(),
+          child: const ForgotPasswordView(),
+        ),
+      );
 
     case EditProfileView.routeName:
       final args = settings.arguments as Map<String, dynamic>;

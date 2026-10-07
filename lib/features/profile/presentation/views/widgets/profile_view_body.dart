@@ -43,97 +43,106 @@ class ProfileViewBody extends StatelessWidget {
         .where((place) => place.status == PlaceStatus.rejected)
         .length;
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ProfileHeaderWidget(colorScheme: colorScheme, user: user),
-                const SizedBox(height: 16),
-                ProfileStatisticsWidget(
-                  colorScheme: colorScheme,
-                  approvedCount: approvedPlaces,
-                  pendingCount: pendingPlaces,
-                  rejectedCount: rejectedPlaces,
-                ),
-                const SizedBox(height: 24),
-                MyPlacesHeaderWidget(
-                  colorScheme: colorScheme,
-                  placesCount: places.length,
-                ),
-                const SizedBox(height: 14),
-                if (places.isEmpty)
-                  ProfileBuildEmptyPlaces()
-                else
-                  ...places.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final place = entry.value;
-                    final category = categories.firstWhere(
-                      (category) => category.id == place.categoryId,
-                      orElse: () => throw Exception('Category not found'),
-                    );
-
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        bottom: index == places.length - 1 ? 0 : 12,
-                      ),
-                      child: MyPlaceCard(
-                        place: place,
-                        category: category,
-                        status: _getStatusText(place.status),
-                        statusColor: _getStatusColor(place.status),
-                        onEdit: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => AddPlaceView(
-                                category: category,
-                                place: place,
-                                onUpdate: (updatedPlace) async {
-                                  await context
-                                      .read<ProfileCubit>()
-                                      .updatePlace(place: updatedPlace);
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                        onDelete: () {
-                          showCustomAppDialog(
-                            context: context,
-                            title: 'حذف المكان',
-                            message:
-                                'هل أنت متأكد من حذف هذا المكان نهائيًا؟\n'
-                                'لن تتمكن من استعادته بعد الحذف.',
-                            icon: Icons.delete_forever_rounded,
-                            iconColor: colorScheme.error,
-                            confirmText: 'حذف نهائيًا',
-                            confirmButtonColor: colorScheme.error,
-                            onConfirm: () async {
-                              await context.read<ProfileCubit>().deletePlace(
-                                placeId: place.id,
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    );
-                  }),
-              ],
-            ),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ProfileHeaderWidget(
+            colorScheme: colorScheme,
+            user: user,
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          child: LogoutWidget(
+
+          const SizedBox(height: 16),
+
+          ProfileStatisticsWidget(
+            colorScheme: colorScheme,
+            approvedCount: approvedPlaces,
+            pendingCount: pendingPlaces,
+            rejectedCount: rejectedPlaces,
+          ),
+
+          const SizedBox(height: 24),
+
+          MyPlacesHeaderWidget(
+            colorScheme: colorScheme,
+            placesCount: places.length,
+          ),
+
+          const SizedBox(height: 14),
+
+          if (places.isEmpty)
+            ProfileBuildEmptyPlaces()
+          else
+            ...places.asMap().entries.map((entry) {
+              final index = entry.key;
+              final place = entry.value;
+
+              final category = categories.firstWhere(
+                (category) => category.id == place.categoryId,
+                orElse: () => throw Exception('Category not found'),
+              );
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: index == places.length - 1 ? 0 : 12,
+                ),
+                child: MyPlaceCard(
+                  place: place,
+                  category: category,
+                  status: _getStatusText(place.status),
+                  statusColor: _getStatusColor(place.status),
+                  onEdit: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => AddPlaceView(
+                          category: category,
+                          place: place,
+                          onUpdate: (updatedPlace) async {
+                            await context.read<ProfileCubit>().updatePlace(
+                              place: updatedPlace,
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  onDelete: () {
+                    showCustomAppDialog(
+                      context: context,
+                      title: 'حذف المكان',
+                      message:
+                          'هل أنت متأكد من حذف هذا المكان نهائيًا؟\n'
+                          'لن تتمكن من استعادته بعد الحذف.',
+                      icon: Icons.delete_forever_rounded,
+                      iconColor: colorScheme.error,
+                      confirmText: 'حذف نهائيًا',
+                      confirmButtonColor: colorScheme.error,
+                      onConfirm: () async {
+                        await context.read<ProfileCubit>().deletePlace(
+                          placeId: place.id,
+                        );
+                      },
+                    );
+                  },
+                ),
+              );
+            }),
+
+          const SizedBox(height: 24),
+
+          // تسجيل الخروج + حذف الحساب
+          // أصبحا الآن داخل الـ ScrollView
+          // وبالتالي يتحركان مع باقي محتوى الصفحة.
+          LogoutWidget(
             colorScheme: colorScheme,
             onLoggedOut: onLoggedOut,
           ),
-        ),
-      ],
+
+          const SizedBox(height: 12),
+        ],
+      ),
     );
   }
 

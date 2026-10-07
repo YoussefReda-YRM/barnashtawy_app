@@ -6,6 +6,8 @@ import 'package:barnasht_app/core/services/notification_service.dart';
 import 'package:barnasht_app/features/add_place/presentation/cubits/add_place_cubit.dart';
 import 'package:barnasht_app/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:barnasht_app/features/auth/domain/repos/auth_repo.dart';
+import 'package:barnasht_app/features/auth/presentation/cubits/email_verification_cubit/email_verification_cubit.dart';
+import 'package:barnasht_app/features/auth/presentation/cubits/forgot_password_cubit/forgot_password_cubit.dart';
 import 'package:barnasht_app/features/home/data/repos/category_repo_impl.dart';
 import 'package:barnasht_app/features/home/domain/repos/category_repo.dart';
 import 'package:barnasht_app/features/home/presentation/cubits/category_cubit.dart';
@@ -32,6 +34,14 @@ void setupGetIt() {
       firebaseAuthService: getIt<FirebaseAuthService>(),
       databaseService: getIt<DatabaseService>(),
     ),
+  );
+
+  getIt.registerFactory<EmailVerificationCubit>(
+    () => EmailVerificationCubit(getIt<AuthRepo>()),
+  );
+
+  getIt.registerFactory<ForgotPasswordCubit>(
+    () => ForgotPasswordCubit(getIt<AuthRepo>()),
   );
 
   // ─────────────────────────────────────────

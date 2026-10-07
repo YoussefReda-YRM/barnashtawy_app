@@ -1,5 +1,6 @@
 import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:barnasht_app/features/auth/presentation/cubits/signup_cubit/signup_cubit.dart';
+import 'package:barnasht_app/features/auth/presentation/views/email_verification_view.dart';
 import 'package:barnasht_app/features/auth/presentation/views/widgets/signup_widgets/signup_view_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,20 +14,19 @@ class SignupViewBodyBlocConsumer extends StatelessWidget {
     return BlocConsumer<SignupCubit, SignupState>(
       listener: (context, state) {
         if (state is SignupSuccess) {
-          Navigator.pop(context);
-          buildBar(
+          Navigator.pushReplacementNamed(
             context,
-            'تم إنشاء الحساب بنجاح',
-            type: SnackBarType.success,
+            EmailVerificationView.routeName,
           );
         }
+
         if (state is SignupFailure) {
           buildBar(context, state.message, type: SnackBarType.error);
         }
       },
       builder: (context, state) {
         return ModalProgressHUD(
-          inAsyncCall: state is SignupLoading ? true : false,
+          inAsyncCall: state is SignupLoading,
           child: const SignupViewBody(),
         );
       },

@@ -370,14 +370,79 @@ class PlaceRepoImpl extends PlaceRepo {
         return left(ServerFailure('يجب تسجيل الدخول أولاً.'));
       }
 
+      // الحصول على المكان المطلوب حذفه
+      final placeData = await databaseService.getData(
+        path: BackendEndpoint.placesPath,
+        documentId: placeId,
+      );
+
+      final place = PlaceModel.fromJson(placeData as Map<String, dynamic>)
+          .toEntity();
+
+      // التأكد أن المكان ملك للمستخدم الحالي
+      if (place.userId != currentUser.uid) {
+        return left(ServerFailure('لا يمكنك حذف هذا المكان.'));
+      }
+
+      // حذف المكان بعد التأكد من الملكية
       await databaseService.deleteData(
         path: BackendEndpoint.placesPath,
         documentId: placeId,
       );
 
+      // تنظيف الـ cache
+      clearAllCache();
+
       return right(null);
     } catch (e) {
       return left(ServerFailure('حدث خطأ أثناء حذف المكان.'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteMyPlaces() async {
+    try {
+      final currentUser = firebaseAuthService.currentUser;
+
+      if (currentUser == null) {
+        return left(ServerFailure('يجب تسجيل الدخول أولاً.'));
+      }
+
+      // الحصول على جميع الأماكن الخاصة بالمستخدم الحالي
+      final data = await databaseService.getData(
+        path: BackendEndpoint.placesPath,
+        queries: [
+          {'whereField': 'userId', 'whereValue': currentUser.uid},
+        ],
+      ) as List<Map<String, dynamic>>;
+
+      // حذف كل مكان
+      for (final placeData in data) {
+        final placeId = placeData['id'] as String?;
+
+        if (placeId == null || placeId.isEmpty) {
+          continue;
+        }
+
+        // التأكد مرة أخرى أن المكان ملك للمستخدم
+        final place = PlaceModel.fromJson(placeData).toEntity();
+
+        if (place.userId != currentUser.uid) {
+          continue;
+        }
+
+        await databaseService.deleteData(
+          path: BackendEndpoint.placesPath,
+          documentId: placeId,
+        );
+      }
+
+      // تنظيف الـ cache بعد حذف الأماكن
+      clearAllCache();
+
+      return right(unit);
+    } catch (e) {
+      return left(ServerFailure('حدث خطأ أثناء حذف الأماكن الخاصة بالحساب.'));
     }
   }
 }

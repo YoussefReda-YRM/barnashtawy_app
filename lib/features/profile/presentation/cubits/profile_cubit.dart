@@ -33,7 +33,12 @@ class ProfileCubit extends Cubit<ProfileState> {
           emit(ProfileFailure(message: failure.message));
         },
         (places) {
-          emit(ProfileSuccess(user: user, places: places as List<PlaceEntity>));
+          emit(
+            ProfileSuccess(
+              user: user,
+              places: places as List<PlaceEntity>,
+            ),
+          );
         },
       );
     } catch (e) {
@@ -57,7 +62,12 @@ class ProfileCubit extends Cubit<ProfileState> {
     try {
       await authRepo.updateUserData(user: user);
 
-      emit(ProfileSuccess(user: user, places: currentState.places));
+      emit(
+        ProfileSuccess(
+          user: user,
+          places: currentState.places,
+        ),
+      );
     } catch (e) {
       emit(
         const ProfileFailure(
@@ -95,5 +105,129 @@ class ProfileCubit extends Cubit<ProfileState> {
         }
       },
     );
+  }
+
+  Future<bool> deleteAccount({String? password}) async {
+    final currentState = state;
+
+    // ----------------------------------------------------------
+    // الحصول على آخر حالة صحيحة للبروفايل
+    // ----------------------------------------------------------
+
+    final ProfileSuccess previousState;
+
+    if (currentState is ProfileSuccess) {
+      previousState = currentState;
+    } else if (currentState is ProfileDeleteFailure) {
+      previousState = currentState.previousState;
+    } else {
+      return false;
+    }
+
+    // ----------------------------------------------------------
+    // حالة الحذف مع الاحتفاظ ببيانات البروفايل الحالية
+    // ----------------------------------------------------------
+
+    emit(
+      ProfileDeleting(
+        previousState: previousState,
+      ),
+    );
+
+    // ----------------------------------------------------------
+    // 1. إعادة التحقق من هوية المستخدم
+    // ----------------------------------------------------------
+
+    final reauthenticateResult = await authRepo.reauthenticate(
+      password: password,
+    );
+
+    final reauthenticateFailure = reauthenticateResult.fold(
+      (failure) => failure,
+      (_) => null,
+    );
+
+    if (reauthenticateFailure != null) {
+      emit(
+        ProfileDeleteFailure(
+          message: reauthenticateFailure.message,
+          previousState: previousState,
+        ),
+      );
+
+      return false;
+    }
+
+    // ----------------------------------------------------------
+    // 2. حذف جميع الأماكن الخاصة بالمستخدم
+    // ----------------------------------------------------------
+
+    final deletePlacesResult = await placeRepo.deleteMyPlaces();
+
+    final placesFailure = deletePlacesResult.fold(
+      (failure) => failure,
+      (_) => null,
+    );
+
+    if (placesFailure != null) {
+      emit(
+        ProfileDeleteFailure(
+          message: placesFailure.message,
+          previousState: previousState,
+        ),
+      );
+
+      return false;
+    }
+
+    // ----------------------------------------------------------
+    // 3. حذف بيانات المستخدم من Firestore
+    // ----------------------------------------------------------
+
+    final deleteUserDataResult = await authRepo.deleteUserData();
+
+    final userDataFailure = deleteUserDataResult.fold(
+      (failure) => failure,
+      (_) => null,
+    );
+
+    if (userDataFailure != null) {
+      emit(
+        ProfileDeleteFailure(
+          message: userDataFailure.message,
+          previousState: previousState,
+        ),
+      );
+
+      return false;
+    }
+
+    // ----------------------------------------------------------
+    // 4. حذف الحساب من Firebase Authentication
+    // ----------------------------------------------------------
+
+    final deleteAccountResult = await authRepo.deleteAccount();
+
+    final accountFailure = deleteAccountResult.fold(
+      (failure) => failure,
+      (_) => null,
+    );
+
+    if (accountFailure != null) {
+      emit(
+        ProfileDeleteFailure(
+          message: accountFailure.message,
+          previousState: previousState,
+        ),
+      );
+
+      return false;
+    }
+
+    // ----------------------------------------------------------
+    // Account deleted successfully
+    // ----------------------------------------------------------
+
+    return true;
   }
 }

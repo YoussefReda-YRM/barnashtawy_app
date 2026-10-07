@@ -24,6 +24,8 @@ class _SignupViewBodyState extends State<SignupViewBody> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -31,6 +33,7 @@ class _SignupViewBodyState extends State<SignupViewBody> {
     phoneController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -47,6 +50,20 @@ class _SignupViewBodyState extends State<SignupViewBody> {
         autovalidateMode = AutovalidateMode.always;
       });
     }
+  }
+
+  bool isArabicName(String value) {
+    final name = value.trim();
+
+    if (name.isEmpty) {
+      return false;
+    }
+
+    final arabicNameRegex = RegExp(
+      r'^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s]+$',
+    );
+
+    return arabicNameRegex.hasMatch(name);
   }
 
   @override
@@ -82,6 +99,13 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                         return 'ادخل الاسم كامل';
                       }
 
+                      if (!isArabicName(value)) {
+                        return 'يجب أن يكون الاسم باللغة العربية فقط';
+                      }
+                      if (value.trim().length < 4) {
+                        return 'ادخل الاسم كامل';
+                      }
+
                       return null;
                     },
                     maxLines: 1,
@@ -100,7 +124,8 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                         return 'ادخل رقم الموبايل';
                       }
 
-                      if (value.trim().length < 11) {
+                      if (value.trim().length < 11 ||
+                          value.trim().length > 11) {
                         return 'ادخل رقم موبايل صحيح';
                       }
 
@@ -132,7 +157,36 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                   const SizedBox(height: 16),
 
                   // Password
-                  PasswordField(controller: passwordController),
+                  PasswordField(
+                    controller: passwordController,
+                    hint: 'كلمة السر',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'ادخل كلمة السر';
+                      }
+
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Confirm Password
+                  PasswordField(
+                    controller: confirmPasswordController,
+                    hint: 'تاكيد كلمة السر',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'أكد كلمة السر';
+                      }
+
+                      if (value != passwordController.text) {
+                        return 'كلمة السر غير متطابقة';
+                      }
+
+                      return null;
+                    },
+                  ),
 
                   const SizedBox(height: 33),
 
@@ -142,7 +196,8 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                   const SizedBox(height: 33),
 
                   const HaveAnAccountWidget(),
-                  SizedBox(height: 16),
+
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
