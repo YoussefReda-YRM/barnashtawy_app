@@ -20,12 +20,9 @@ class _MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final authService = getIt<FirebaseAuthService>();
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
-
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: currentViewIndex,
         onItemTapped: (index) {

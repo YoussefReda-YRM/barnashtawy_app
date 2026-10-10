@@ -14,13 +14,15 @@ class CustomBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    final colorScheme = theme.colorScheme;
 
     return Container(
       width: double.infinity,
       height: 70,
       decoration: ShapeDecoration(
-        color: colorScheme.surface,
+        color: theme.scaffoldBackgroundColor,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),

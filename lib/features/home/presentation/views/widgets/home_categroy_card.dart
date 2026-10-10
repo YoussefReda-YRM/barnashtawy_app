@@ -1,17 +1,30 @@
+import 'package:barnasht_app/core/utils/app_colors.dart';
 import 'package:barnasht_app/core/utils/app_images.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:flutter/material.dart';
 
 class HomeCategoryCard extends StatelessWidget {
-  const HomeCategoryCard({super.key, required this.category, this.onTap});
+  const HomeCategoryCard({
+    super.key,
+    required this.category,
+    this.onTap,
+  });
 
   final CategoryEntity category;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    // ============================================================
+    // Card Color
+    // ============================================================
+    final cardColor = theme.brightness == Brightness.dark
+        ? AppColors.darkCard
+        : AppColors.lightSurface;
 
     return Material(
       color: Colors.transparent,
@@ -20,12 +33,17 @@ class HomeCategoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Ink(
           decoration: BoxDecoration(
-            color: colorScheme.surface,
+            // Dark mode: #141C21
+            // Light mode: #FFFFFF
+            color: cardColor,
+
             borderRadius: BorderRadius.circular(20),
+
             border: Border.all(
               color: colorScheme.primary.withValues(alpha: 0.6),
               width: 1.3,
             ),
+
             boxShadow: [
               BoxShadow(
                 color: colorScheme.primary.withValues(alpha: 0.12),
@@ -40,6 +58,7 @@ class HomeCategoryCard extends StatelessWidget {
               ),
             ],
           ),
+
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Column(

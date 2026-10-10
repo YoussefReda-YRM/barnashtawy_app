@@ -6,6 +6,9 @@ class CustomLogoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(Assets.imagesAppLogoTransparent, width: 70, height: 70);
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: Image.asset(Assets.imagesAppLogoTransparent, width: 60, height: 60),
+    );
   }
 }

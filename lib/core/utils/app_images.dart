@@ -166,10 +166,6 @@ class Assets {
   /// assets/images/school.png
   static const String imagesSchool = "assets/images/school.png";
 
-  /// Assets for imagesSearch
-  /// assets/images/search.svg
-  static const String imagesSearch = "assets/images/search.svg";
-
   /// Assets for imagesSearchFilter
   /// assets/images/search_filter.svg
   static const String imagesSearchFilter = "assets/images/search_filter.svg";

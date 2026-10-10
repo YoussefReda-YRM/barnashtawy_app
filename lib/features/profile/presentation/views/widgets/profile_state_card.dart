@@ -1,3 +1,4 @@
+import 'package:barnasht_app/core/utils/app_colors.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
@@ -17,17 +18,24 @@ class ProfileStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final cardColor = theme.brightness == Brightness.dark
+        ? AppColors.darkCard
+        : AppColors.lightSurface;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.12)),
+        border: Border.all(color: color.withValues(alpha: 0.15), width: 1),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.05),
+            color: Colors.black.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.16 : 0.05,
+            ),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

@@ -18,7 +18,7 @@ class ProfileHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userName = user.name.trim().isEmpty
-        ? 'مستخدم برنشتاوي'
+        ? 'مستخدم رفيق'
         : user.name.trim();
 
     final email = user.email.trim().isEmpty

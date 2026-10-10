@@ -1,3 +1,4 @@
+import 'package:barnasht_app/core/utils/app_colors.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
 import 'package:flutter/material.dart';
@@ -24,12 +25,20 @@ class PlaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     final favoriteColor = colorScheme.error;
 
     final hasPhoneNumber =
         place.phoneNumber != null && place.phoneNumber!.trim().isNotEmpty;
+
+    // ============================================================
+    // Card Color
+    // ============================================================
+    final cardColor = theme.brightness == Brightness.dark
+        ? AppColors.darkCard
+        : AppColors.lightSurface;
 
     return Material(
       color: Colors.transparent,
@@ -38,21 +47,27 @@ class PlaceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Ink(
           decoration: BoxDecoration(
-            color: colorScheme.surface,
+            color: cardColor,
+
             borderRadius: BorderRadius.circular(20),
+
             border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.25),
-              width: 1.1,
+              color: colorScheme.primary.withValues(alpha: 0.20),
+              width: 1.0,
             ),
+
             boxShadow: [
               BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.07),
+                color: Colors.black.withValues(
+                  alpha: theme.brightness == Brightness.dark ? 0.22 : 0.06,
+                ),
                 blurRadius: 14,
                 spreadRadius: 1,
                 offset: const Offset(0, 5),
               ),
             ],
           ),
+
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -184,13 +199,13 @@ class PlaceCard extends StatelessWidget {
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.10),
+                            color: colorScheme.primary.withValues(alpha: 0.10),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.phone_rounded,
                             size: 18,
-                            color: Colors.green,
+                            color: colorScheme.primary,
                           ),
                         ),
                       ),

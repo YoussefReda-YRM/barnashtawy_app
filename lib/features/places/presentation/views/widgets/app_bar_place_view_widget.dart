@@ -54,7 +54,7 @@ class AppBarPlaceViewWidget extends StatelessWidget {
                     showCustomAppDialog(
                       context: context,
                       title: 'تسجيل الدخول مطلوب',
-                      message: 'لإضافة مكان جديد والمساهمة في خدمة أهل برنشت، يجب عليك تسجيل الدخول أولاً.',
+                      message: 'لإضافة مكان جديد والمساهمة في خدمة أهل المنطقة يجب عليك تسجيل الدخول أولاً.',
                       icon: Icons.lock_outline_rounded,
                       iconColor: colorScheme.primary,
                       confirmButtonColor: colorScheme.primary,

@@ -1,3 +1,4 @@
+import 'package:barnasht_app/core/utils/app_colors.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
@@ -45,18 +46,21 @@ class CustomTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final fieldColor = theme.brightness == Brightness.dark
+        ? AppColors.darkCard
+        : AppColors.lightSurface;
+
     return TextFormField(
       controller: controller,
       validator: validator,
       onSaved: onSaved,
       onChanged: onChanged,
-
       readOnly: readOnly,
       obscureText: obscureText,
-
       minLines: minLines,
       maxLines: maxLines,
-
       keyboardType: keyboardType,
 
       textInputAction:
@@ -82,7 +86,8 @@ class CustomTextFormField extends StatelessWidget {
 
         filled: true,
 
-        fillColor: colorScheme.surface,
+        // نفس لون الكروت والـ SearchField
+        fillColor: fieldColor,
 
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
@@ -108,7 +113,7 @@ class CustomTextFormField extends StatelessWidget {
       borderSide: BorderSide(
         width: 1,
         color: colorScheme.primary.withValues(
-          alpha: 0.20,
+          alpha: 0.25,
         ),
       ),
     );

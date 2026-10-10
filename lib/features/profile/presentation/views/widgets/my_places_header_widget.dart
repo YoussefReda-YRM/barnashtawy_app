@@ -26,7 +26,7 @@ class MyPlacesHeaderWidget extends StatelessWidget {
               ),
               const SizedBox(height: 3),
               Text(
-                'الأماكن التي قمت بطلب إضافتها إلى برنشتاوي',
+                'الأماكن التي قمت بطلب إضافتها إلى رفيق',
                 style: TextStyles.regular11.copyWith(
                   color: colorScheme.onSurface.withValues(alpha: 0.55),
                 ),

@@ -162,7 +162,7 @@ class LogoutWidget extends StatelessWidget {
                     const SizedBox(height: 2),
 
                     Text(
-                      'الخروج من حسابك على برنشتاوي',
+                      'الخروج من حسابك على رفيق',
                       style: TextStyles.regular11.copyWith(
                         color: colorScheme.onSurface.withValues(alpha: 0.50),
                       ),

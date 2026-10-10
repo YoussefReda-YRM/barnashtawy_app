@@ -26,7 +26,7 @@ class PermissionTopBrand extends StatelessWidget {
         ),
         const SizedBox(width: 11),
         Text(
-          'برنشتاوي',
+          'رفيق',
           style: TextStyle(
             color: colorScheme.onSurface,
             fontSize: 20,

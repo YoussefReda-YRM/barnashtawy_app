@@ -1,5 +1,6 @@
 import 'package:barnasht_app/core/helper_functions/mak_phone_call.dart';
 import 'package:barnasht_app/core/helper_functions/open_location.dart';
+import 'package:barnasht_app/core/utils/app_colors.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
 import 'package:barnasht_app/features/places/domain/entities/place_entity.dart';
@@ -27,7 +28,8 @@ class MyPlaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     final categoryName = category.name;
     final categoryImage = category.image;
@@ -35,11 +37,15 @@ class MyPlaceCard extends StatelessWidget {
     final hasPhoneNumber =
         place.phoneNumber != null && place.phoneNumber!.trim().isNotEmpty;
 
+    final cardColor = theme.brightness == Brightness.dark
+        ? AppColors.darkCard
+        : AppColors.lightSurface;
+
     return Material(
       color: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
-          color: colorScheme.surface,
+          color: cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: colorScheme.primary.withValues(alpha: 0.25),
@@ -47,7 +53,9 @@ class MyPlaceCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withValues(alpha: 0.05),
+              color: Colors.black.withValues(
+                alpha: theme.brightness == Brightness.dark ? 0.20 : 0.06,
+              ),
               blurRadius: 14,
               spreadRadius: 1,
               offset: const Offset(0, 5),
@@ -58,6 +66,9 @@ class MyPlaceCard extends StatelessWidget {
           padding: const EdgeInsets.all(13),
           child: Column(
             children: [
+              // ============================================================
+              // HEADER
+              // ============================================================
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -116,6 +127,8 @@ class MyPlaceCard extends StatelessWidget {
                           ],
                         ),
 
+                        const SizedBox(height: 6),
+
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 9,
@@ -147,6 +160,9 @@ class MyPlaceCard extends StatelessWidget {
 
               const SizedBox(height: 12),
 
+              // ============================================================
+              // ADDRESS
+              // ============================================================
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -199,6 +215,9 @@ class MyPlaceCard extends StatelessWidget {
                 ),
               ),
 
+              // ============================================================
+              // PHONE
+              // ============================================================
               if (hasPhoneNumber) ...[
                 const SizedBox(height: 10),
 

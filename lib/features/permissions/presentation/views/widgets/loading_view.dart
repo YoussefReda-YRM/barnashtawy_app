@@ -36,24 +36,12 @@ class _LoadingViewState extends State<LoadingView>
       duration: const Duration(milliseconds: 1200),
     )..repeat();
 
-    _scale = Tween<double>(
-      begin: 0.94,
-      end: 1.04,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
+    _scale = Tween<double>(begin: 0.94, end: 1.04).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    _glow = Tween<double>(
-      begin: 0.08,
-      end: 0.18,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
+    _glow = Tween<double>(begin: 0.08, end: 0.18).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
 
@@ -67,20 +55,22 @@ class _LoadingViewState extends State<LoadingView>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final primaryColor = colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      // Main screen background
+      // Dark mode: #0B1014
+      // Light mode: #F7F9F7
+      backgroundColor: theme.scaffoldBackgroundColor,
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedBuilder(
-              animation: Listenable.merge([
-                _pulseController,
-                _orbitController,
-              ]),
+              animation: Listenable.merge([_pulseController, _orbitController]),
               builder: (context, child) {
                 return Transform.scale(
                   scale: _scale.value,
@@ -95,15 +85,12 @@ class _LoadingViewState extends State<LoadingView>
                           height: 184,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: primaryColor.withValues(
-                              alpha: _glow.value,
-                            ),
+                            color: primaryColor.withValues(alpha: _glow.value),
                           ),
                         ),
 
                         Transform.rotate(
-                          angle:
-                              _orbitController.value * 2 * 3.1415926535,
+                          angle: _orbitController.value * 2 * 3.1415926535,
                           child: SizedBox(
                             width: 164,
                             height: 164,
@@ -124,12 +111,14 @@ class _LoadingViewState extends State<LoadingView>
                           padding: const EdgeInsets.all(22),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
+
+                            // Surface is intentionally kept here.
+                            // This is the logo container, not the screen background.
                             color: colorScheme.surface,
+
                             boxShadow: [
                               BoxShadow(
-                                color: primaryColor.withValues(
-                                  alpha: 0.14,
-                                ),
+                                color: primaryColor.withValues(alpha: 0.14),
                                 blurRadius: 30,
                                 spreadRadius: 3,
                               ),
@@ -142,8 +131,7 @@ class _LoadingViewState extends State<LoadingView>
                         ),
 
                         Transform.rotate(
-                          angle:
-                              _orbitController.value * 2 * 3.1415926535,
+                          angle: _orbitController.value * 2 * 3.1415926535,
                           child: Align(
                             alignment: Alignment.topCenter,
                             child: Container(
@@ -154,9 +142,7 @@ class _LoadingViewState extends State<LoadingView>
                                 color: primaryColor,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: primaryColor.withValues(
-                                      alpha: 0.45,
-                                    ),
+                                    color: primaryColor.withValues(alpha: 0.45),
                                     blurRadius: 10,
                                   ),
                                 ],
@@ -174,12 +160,12 @@ class _LoadingViewState extends State<LoadingView>
             const SizedBox(height: 34),
 
             Text(
-              'بنجهزلك برنشتاوي...',
+              'بنجهزلك رفيق...',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: colorScheme.onSurface,
-                  ),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: colorScheme.onSurface,
+              ),
             ),
 
             const SizedBox(height: 10),
@@ -187,10 +173,10 @@ class _LoadingViewState extends State<LoadingView>
             Text(
               'لحظة ونكون جاهزين ليك',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
 
             const SizedBox(height: 18),
@@ -200,44 +186,34 @@ class _LoadingViewState extends State<LoadingView>
               builder: (context, child) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    3,
-                    (index) {
-                      final delay = index * 0.22;
-                      final value =
-                          (_dotsController.value + delay) % 1.0;
+                  children: List.generate(3, (index) {
+                    final delay = index * 0.22;
+                    final value = (_dotsController.value + delay) % 1.0;
 
-                      final opacity = 0.25 +
-                          (value < 0.5
-                              ? value * 1.5
-                              : (1 - value) * 1.5);
+                    final opacity =
+                        0.25 + (value < 0.5 ? value * 1.5 : (1 - value) * 1.5);
 
-                      final scale = 0.75 +
-                          (value < 0.5
-                              ? value * 0.5
-                              : (1 - value) * 0.5);
+                    final scale =
+                        0.75 + (value < 0.5 ? value * 0.5 : (1 - value) * 0.5);
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                        ),
-                        child: Opacity(
-                          opacity: opacity.clamp(0.25, 1.0),
-                          child: Transform.scale(
-                            scale: scale,
-                            child: Container(
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: primaryColor,
-                              ),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Opacity(
+                        opacity: opacity.clamp(0.25, 1.0),
+                        child: Transform.scale(
+                          scale: scale,
+                          child: Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: primaryColor,
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  }),
                 );
               },
             ),

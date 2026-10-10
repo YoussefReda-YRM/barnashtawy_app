@@ -5,8 +5,7 @@ class PermissionLoadingView extends StatefulWidget {
   const PermissionLoadingView({super.key});
 
   @override
-  State<PermissionLoadingView> createState() =>
-      _PermissionLoadingViewState();
+  State<PermissionLoadingView> createState() => _PermissionLoadingViewState();
 }
 
 class _PermissionLoadingViewState extends State<PermissionLoadingView>
@@ -37,24 +36,12 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
       duration: const Duration(milliseconds: 1200),
     )..repeat();
 
-    _scale = Tween<double>(
-      begin: 0.94,
-      end: 1.04,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
+    _scale = Tween<double>(begin: 0.94, end: 1.04).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    _glow = Tween<double>(
-      begin: 0.08,
-      end: 0.18,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
+    _glow = Tween<double>(begin: 0.08, end: 0.18).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
 
@@ -68,20 +55,22 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final primaryColor = colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      // Main screen background
+      // Dark mode: #0B1014
+      // Light mode: #F7F9F7
+      backgroundColor: theme.scaffoldBackgroundColor,
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedBuilder(
-              animation: Listenable.merge([
-                _pulseController,
-                _orbitController,
-              ]),
+              animation: Listenable.merge([_pulseController, _orbitController]),
               builder: (context, child) {
                 return Transform.scale(
                   scale: _scale.value,
@@ -96,25 +85,19 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
                           height: 184,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: primaryColor.withValues(
-                              alpha: _glow.value,
-                            ),
+                            color: primaryColor.withValues(alpha: _glow.value),
                           ),
                         ),
 
                         Transform.rotate(
-                          angle:
-                              _orbitController.value *
-                              2 *
-                              3.1415926535,
+                          angle: _orbitController.value * 2 * 3.1415926535,
                           child: SizedBox(
                             width: 164,
                             height: 164,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
                               value: 0.72,
-                              backgroundColor:
-                                  primaryColor.withValues(
+                              backgroundColor: primaryColor.withValues(
                                 alpha: 0.08,
                               ),
                               color: primaryColor,
@@ -128,13 +111,14 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
                           padding: const EdgeInsets.all(22),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
+
+                            // Surface for the logo container.
+                            // This remains #192127 in dark mode.
                             color: colorScheme.surface,
+
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                    primaryColor.withValues(
-                                  alpha: 0.14,
-                                ),
+                                color: primaryColor.withValues(alpha: 0.14),
                                 blurRadius: 30,
                                 spreadRadius: 3,
                               ),
@@ -147,10 +131,7 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
                         ),
 
                         Transform.rotate(
-                          angle:
-                              _orbitController.value *
-                              2 *
-                              3.1415926535,
+                          angle: _orbitController.value * 2 * 3.1415926535,
                           child: Align(
                             alignment: Alignment.topCenter,
                             child: Container(
@@ -161,10 +142,7 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
                                 color: primaryColor,
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        primaryColor.withValues(
-                                      alpha: 0.45,
-                                    ),
+                                    color: primaryColor.withValues(alpha: 0.45),
                                     blurRadius: 10,
                                   ),
                                 ],
@@ -182,15 +160,12 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
             const SizedBox(height: 34),
 
             Text(
-              'بنجهزلك برنشتاوي...',
+              'بنجهزلك رفيق...',
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: colorScheme.onSurface,
-                  ),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: colorScheme.onSurface,
+              ),
             ),
 
             const SizedBox(height: 10),
@@ -198,13 +173,10 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
             Text(
               'لحظة ونكون جاهزين ليك',
               textAlign: TextAlign.center,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
 
             const SizedBox(height: 18),
@@ -216,24 +188,16 @@ class _PermissionLoadingViewState extends State<PermissionLoadingView>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(3, (index) {
                     final delay = index * 0.22;
+                    final value = (_dotsController.value + delay) % 1.0;
 
-                    final value =
-                        (_dotsController.value + delay) % 1.0;
+                    final opacity =
+                        0.25 + (value < 0.5 ? value * 1.5 : (1 - value) * 1.5);
 
-                    final opacity = 0.25 +
-                        (value < 0.5
-                            ? value * 1.5
-                            : (1 - value) * 1.5);
-
-                    final scale = 0.75 +
-                        (value < 0.5
-                            ? value * 0.5
-                            : (1 - value) * 0.5);
+                    final scale =
+                        0.75 + (value < 0.5 ? value * 0.5 : (1 - value) * 0.5);
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Opacity(
                         opacity: opacity.clamp(0.25, 1.0),
                         child: Transform.scale(

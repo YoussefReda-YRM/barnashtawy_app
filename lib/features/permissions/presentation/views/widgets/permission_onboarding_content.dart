@@ -19,24 +19,19 @@ class PermissionOnboardingContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: BlocBuilder<
-            PermissionOnboardingCubit,
-            PermissionOnboardingStep>(
+        child: BlocBuilder<PermissionOnboardingCubit, PermissionOnboardingStep>(
           builder: (context, step) {
             if (step == PermissionOnboardingStep.loading) {
               return const PermissionLoadingView();
             }
 
-            final isLocation =
-                step == PermissionOnboardingStep.location;
+            final isLocation = step == PermissionOnboardingStep.location;
 
             final isLocationServiceDisabled =
-                step ==
-                    PermissionOnboardingStep.locationServiceDisabled;
+                step == PermissionOnboardingStep.locationServiceDisabled;
 
             final isLocationPermanentlyDenied =
-                step ==
-                    PermissionOnboardingStep.locationPermanentlyDenied;
+                step == PermissionOnboardingStep.locationPermanentlyDenied;
 
             if (isLocation ||
                 isLocationServiceDisabled ||
@@ -44,19 +39,18 @@ class PermissionOnboardingContent extends StatelessWidget {
               return PermissionPage(
                 type: PermissionPageType.location,
                 title: isLocationPermanentlyDenied
-                    ? 'موقعك مهم لبرنشتاوي'
-                    : 'خلّي برنشتاوي أقرب ليك',
+                    ? 'موقعك مهم لرفيق'
+                    : 'خلّي رفيق أقرب ليك',
                 description:
                     'عشان نعرض لك الأماكن والخدمات الموجودة حواليك، '
-                    'برنشتاوي محتاج يعرف موقعك الحالي أثناء استخدام التطبيق.',
+                    'رفيق محتاج يعرف موقعك الحالي أثناء استخدام التطبيق.',
                 buttonText: isLocationPermanentlyDenied
                     ? 'فتح إعدادات التطبيق'
                     : isLocationServiceDisabled
-                        ? 'تفعيل خدمة الموقع'
-                        : 'السماح بالوصول للموقع',
+                    ? 'تفعيل خدمة الموقع'
+                    : 'السماح بالوصول للموقع',
                 onPressed: () {
-                  final cubit =
-                      context.read<PermissionOnboardingCubit>();
+                  final cubit = context.read<PermissionOnboardingCubit>();
 
                   if (isLocationPermanentlyDenied) {
                     onOpenLocationAppSettings();
@@ -78,7 +72,7 @@ class PermissionOnboardingContent extends StatelessWidget {
                 type: PermissionPageType.notification,
                 title: 'خليك دايمًا في الصورة',
                 description:
-                    'فعّل إشعارات برنشتاوي عشان توصلك التنبيهات المهمة '
+                    'فعّل إشعارات رفيق عشان توصلك التنبيهات المهمة '
                     'ورسائل الشات الجديدة في وقتها.',
                 buttonText: 'تفعيل الإشعارات',
                 onPressed: () {
@@ -88,9 +82,7 @@ class PermissionOnboardingContent extends StatelessWidget {
                 },
                 secondaryText: 'لاحقًا',
                 onSecondaryPressed: () {
-                  context
-                      .read<PermissionOnboardingCubit>()
-                      .skipNotification();
+                  context.read<PermissionOnboardingCubit>().skipNotification();
                 },
               );
             }

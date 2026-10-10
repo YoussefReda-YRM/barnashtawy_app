@@ -1,4 +1,5 @@
 import 'package:barnasht_app/core/constatnts.dart';
+import 'package:barnasht_app/core/utils/app_colors.dart';
 import 'package:barnasht_app/core/utils/app_images.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/core/widgets/custom_divider_widget.dart';
@@ -19,16 +20,20 @@ class ToContactUsWidget extends StatelessWidget {
       );
 
       if (!launched && context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('تعذر فتح صفحة فيسبوك')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تعذر فتح صفحة رفيق على فيسبوك'),
+          ),
+        );
       }
     } catch (e) {
       debugPrint('Facebook Error: $e');
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('حدث خطأ أثناء فتح فيسبوك')),
+          const SnackBar(
+            content: Text('حدث خطأ أثناء فتح صفحة رفيق'),
+          ),
         );
       }
     }
@@ -36,70 +41,98 @@ class ToContactUsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     const facebookColor = Color(0xFF1877F2);
 
+    // ============================================================
+    // Transparent / Soft Background
+    // ============================================================
+    final backgroundColor = theme.brightness == Brightness.dark
+        ? AppColors.darkSurface.withValues(alpha: 0.45)
+        : AppColors.lightSurface.withValues(alpha: 0.65);
+
     return Container(
-      color: colorScheme.primary.withValues(alpha: 0.1),
+      width: double.infinity,
+      color: backgroundColor,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           const CustomDividerWidget(),
 
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
 
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'التصميم والتطبيق بالكامل صُنع بواسطة ',
-                  style: TextStyles.regular11.copyWith(
-                    color: colorScheme.onSurface.withValues(alpha: 0.60),
+          // ============================================================
+          // Rafiq Updates
+          // ============================================================
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'تابع رفيق على فيسبوك ',
+                    style: TextStyles.bold11.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                TextSpan(
-                  text: 'المهندس / يوسف رضا الشليحي',
-                  style: TextStyles.bold11.copyWith(
-                    color: colorScheme.onSurface,
+                  TextSpan(
+                    text: 'لمعرفة آخر التحديثات والأخبار',
+                    style: TextStyles.regular11.copyWith(
+                      color: colorScheme.onSurface.withValues(
+                        alpha: 0.60,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
 
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
 
+          // ============================================================
+          // Facebook Button
+          // ============================================================
           InkWell(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(24),
             onTap: () => _openFacebook(context),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 4,
+              ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                color: facebookColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(24),
+                color: facebookColor.withValues(alpha: 0.10),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgPicture.asset(
                     Assets.imagesFacebookIcon,
-                    width: 16,
-                    height: 16,
+                    width: 15,
+                    height: 15,
                   ),
 
-                  const SizedBox(width: 7),
+                  const SizedBox(width: 6),
 
                   Text(
-                    'تابعنا على فيسبوك',
-                    style: TextStyles.semiBold11.copyWith(color: facebookColor),
+                    'تابع رفيق على فيسبوك',
+                    style: TextStyles.semiBold11.copyWith(
+                      color: facebookColor,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
 
-          const SizedBox(height: 5),
+          const SizedBox(height: 4),
 
           const CustomDividerWidget(),
         ],

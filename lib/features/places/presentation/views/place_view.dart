@@ -1,3 +1,4 @@
+import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:barnasht_app/core/widgets/build_bar.dart';
 import 'package:barnasht_app/core/widgets/search_text_field.dart';
 import 'package:barnasht_app/features/home/domain/entities/category_entities.dart';
@@ -122,20 +123,20 @@ class _PlaceViewState extends State<PlaceView> {
                           children: [
                             Text(
                               'فلترة الأماكن',
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.w800),
+                              style: TextStyles.bold16.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
                             ),
 
                             const SizedBox(height: 3),
 
                             Text(
                               'اختر أقصى مسافة للبحث من موقعك',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: colorScheme.onSurface.withValues(
-                                      alpha: 0.60,
-                                    ),
-                                  ),
+                              style: TextStyles.regular11.copyWith(
+                                color: colorScheme.onSurface.withValues(
+                                  alpha: 0.60,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -165,8 +166,9 @@ class _PlaceViewState extends State<PlaceView> {
                     children: [
                       Text(
                         'المسافة',
-                        style: Theme.of(context).textTheme.titleSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                        style: TextStyles.semiBold13.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
                       ),
 
                       const SizedBox(height: 12),
@@ -270,14 +272,14 @@ class _PlaceViewState extends State<PlaceView> {
                                         children: [
                                           Text(
                                             filter.label,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge
-                                                ?.copyWith(
-                                                  fontWeight: isSelected
-                                                      ? FontWeight.w800
-                                                      : FontWeight.w600,
-                                                ),
+                                            style:
+                                                (isSelected
+                                                        ? TextStyles.bold13
+                                                        : TextStyles.semiBold13)
+                                                    .copyWith(
+                                                      color:
+                                                          colorScheme.onSurface,
+                                                    ),
                                           ),
 
                                           if (filter == PlaceDistanceFilter.all)
@@ -287,10 +289,8 @@ class _PlaceViewState extends State<PlaceView> {
                                               ),
                                               child: Text(
                                                 'عرض جميع الأماكن',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall
-                                                    ?.copyWith(
+                                                style: TextStyles.regular11
+                                                    .copyWith(
                                                       color: colorScheme
                                                           .onSurface
                                                           .withValues(
@@ -386,12 +386,14 @@ class _PlaceViewState extends State<PlaceView> {
 
                             Expanded(
                               child: Text(
-                                'يتم عرض الأماكن من الأقرب إليك إلى الأبعد، وعند تقارب المسافة يظهر المكان الأحدث أولًا.',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      height: 1.6,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                'يتم عرض الأماكن من الأقرب إليك إلى الأبعد، '
+                                'وعند تقارب المسافة يظهر المكان الأحدث أولًا.',
+                                style: TextStyles.regular11.copyWith(
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.75,
+                                  ),
+                                  height: 1.6,
+                                ),
                               ),
                             ),
                           ],
@@ -449,10 +451,9 @@ class _PlaceViewState extends State<PlaceView> {
                   const SizedBox(width: 6),
                   Text(
                     'الأقرب إلى موقعك يظهر أولًا',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: TextStyles.semiBold11.copyWith(
                       color: Theme.of(context).colorScheme.onSurface
                           .withValues(alpha: 0.60),
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

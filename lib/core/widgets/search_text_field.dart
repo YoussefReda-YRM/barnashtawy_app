@@ -1,4 +1,4 @@
-
+import 'package:barnasht_app/core/utils/app_colors.dart';
 import 'package:barnasht_app/core/utils/app_images.dart';
 import 'package:barnasht_app/core/utils/app_text_styles.dart';
 import 'package:flutter/material.dart';
@@ -93,10 +93,18 @@ class _SearchTextFieldState extends State<SearchTextField>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     final bool hasText = widget.controller.text.isNotEmpty;
     final bool isFocused = widget.focusNode.hasFocus;
+
+    // ============================================================
+    // Search Field Color
+    // ============================================================
+    final fieldColor = theme.brightness == Brightness.dark
+        ? AppColors.darkCard
+        : AppColors.lightSurface;
 
     return Container(
       decoration: BoxDecoration(
@@ -167,7 +175,11 @@ class _SearchTextFieldState extends State<SearchTextField>
             color: colorScheme.onSurface.withValues(alpha: 0.45),
           ),
           filled: true,
-          fillColor: colorScheme.surface,
+
+          // Dark mode: #141C21
+          // Light mode: #FFFFFF
+          fillColor: fieldColor,
+
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
@@ -200,4 +212,3 @@ class _SearchTextFieldState extends State<SearchTextField>
     );
   }
 }
-
